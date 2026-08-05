@@ -65,6 +65,32 @@ model-verity --version
 
 数据默认保存在 `~/.config/model-verity`，或 `$XDG_CONFIG_HOME/model-verity`。服务默认只监听 `127.0.0.1`。公网部署应只绑定受控内网或 bridge 地址，并在反向代理启用 HTTPS 和认证。
 
+## Docker Compose 部署
+
+仓库自带 `Dockerfile` 与 `docker-compose.yml`，适合服务器部署（镜像基于 Node 22，已实测构建与启动）。
+
+```bash
+# 1. 生成随机主密钥（用于加密持久化的供应商 Key）
+openssl rand -hex 32
+
+# 2. 配置环境变量（或写入 .env 文件）
+export MODEL_VERITY_MASTER_KEY=<上一步输出>
+export MODEL_VERITY_ALLOWED_HOSTS=model-verity.example   # 反向代理传入的域名
+
+# 3. 构建并启动
+cd model-verity
+docker compose up -d --build
+# 访问 http://127.0.0.1:8787
+```
+
+部署要点：
+
+- 数据持久化在命名卷 `model-verity-data`（容器内 `/data`）：SQLite、加密后的供应商 Key 和报告绑定密钥都在其中；升级容器不影响数据。
+- 容器内没有系统 keychain，`MODEL_VERITY_DISABLE_KEYCHAIN=1` 强制使用 AES-256-GCM 加密文件回退，主密钥必须来自 `MODEL_VERITY_MASTER_KEY`。密钥要妥善保管，丢失后无法解密已保存的供应商 Key；更改主密钥前请备份 `/data`。
+- 默认只绑定 `127.0.0.1:8787`，不直接暴露公网。对外访问请经反向代理启用 HTTPS 与认证（应用自身不提供登录）。
+- Host 白名单：应用只响应 `MODEL_VERITY_ALLOWED_HOSTS` 中的域名（默认 `localhost`/`127.0.0.1`）；用域名访问需把域名加入。
+- SSRF 默认拒绝私网/loopback/保留地址：容器内连接内网或宿主机 endpoint 会失败。仅本地 mock 且显式设置 `MODEL_VERITY_ALLOW_PRIVATE_ENDPOINTS=1` 时才放行，生产不要开启。
+
 ## 验证方式
 
 ### 参考样本比对

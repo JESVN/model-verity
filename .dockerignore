@@ -1,0 +1,12 @@
+node_modules
+dist
+pamela-publish-data
+artifacts
+docs
+test
+.git
+*.log
+.env
+.env.*
+.DS_Store
+src/data/*.bak-146

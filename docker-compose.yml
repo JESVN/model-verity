@@ -1,0 +1,22 @@
+services:
+  model-verity:
+    build: .
+    image: model-verity:latest
+    container_name: model-verity
+    restart: unless-stopped
+    # 只绑定本机回环；公网访问请用带 HTTPS + 认证的反向代理，不要把 8787 直接暴露。
+    ports:
+      - "127.0.0.1:8787:8787"
+    environment:
+      # 容器内无系统 keychain，强制使用 AES-256-GCM 加密文件回退。
+      MODEL_VERITY_DISABLE_KEYCHAIN: "1"
+      # 生成方式：openssl rand -hex 32；务必妥善保管，丢失后无法解密已保存的供应商 Key。
+      MODEL_VERITY_MASTER_KEY: "${MODEL_VERITY_MASTER_KEY:?missing; generate with: openssl rand -hex 32}"
+      # 反向代理传入的 Host 白名单（逗号分隔），默认只允许 localhost/127.0.0.1。
+      MODEL_VERITY_ALLOWED_HOSTS: "${MODEL_VERITY_ALLOWED_HOSTS:-localhost}"
+      XDG_CONFIG_HOME: "/data"
+    volumes:
+      - model-verity-data:/data
+
+volumes:
+  model-verity-data:
