@@ -107,7 +107,7 @@ export interface ApiZenodoProxyInfo { configured: boolean; host: string | null; 
 export interface ApiZenodoProxyTestResult { ok: boolean; error?: string; latencyMs?: number }
 
 export interface ApiZenodoUpdateStatus {
-  current: { libraryVersion: string; models: number; collectedAt: string; source: "bundled" | "runtime"; recordId?: string };
+  current: { libraryVersion: string; models: number; collectedAt: string; source: "bundled" | "runtime"; recordId?: string; modelIds: string[] };
   latest: { recordId: string; version?: string; updated: string } | null;
   updateAvailable: boolean;
   catalog: { recordId?: string; ready: boolean; builtAt?: string; models: ApiZenodoCatalogModel[]; total: number; qualified: number };

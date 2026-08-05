@@ -237,6 +237,7 @@ test("Zenodo update: check -> prepare -> apply selected -> rollback -> clean cac
     assert.equal(applied.current.source, "runtime");
     assert.equal(applied.current.models, 2);
     assert.equal(applied.versions.length, 1);
+    assert.ok(applied.current.modelIds.includes("openai/gpt-5.6-sol"));
 
     // runtime overlay becomes visible through the built-in library API
     configureLibraryOverlay(join(dir, "builtin-library"));

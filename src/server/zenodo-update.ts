@@ -111,7 +111,7 @@ export interface ZenodoUpdateJob {
 }
 
 export interface ZenodoUpdateStatus {
-  current: { libraryVersion: string; models: number; collectedAt: string; source: "bundled" | "runtime"; recordId?: string };
+  current: { libraryVersion: string; models: number; collectedAt: string; source: "bundled" | "runtime"; recordId?: string; modelIds: string[] };
   latest: { recordId: string; version?: string; updated: string } | null;
   updateAvailable: boolean;
   catalog: { recordId?: string; ready: boolean; builtAt?: string; models: CatalogModelInfo[]; total: number; qualified: number };
@@ -395,14 +395,21 @@ export class ZenodoUpdateManager {
         collectedAt: runtime.zenodo.updated,
         source: "runtime",
         recordId: runtime.zenodo.recordId,
+        modelIds: library ? library.models.map((model) => model.model) : [],
       };
     }
     try {
       const bundledPath = join(import.meta.dirname, "../data/builtin-fingerprints.json.gz");
       const bundled = JSON.parse(gunzipSync(readFileSync(bundledPath)).toString("utf8"));
-      return { libraryVersion: bundled.libraryVersion, models: bundled.models.length, collectedAt: bundled.source.collectedAt, source: "bundled" };
+      return {
+        libraryVersion: bundled.libraryVersion,
+        models: bundled.models.length,
+        collectedAt: bundled.source.collectedAt,
+        source: "bundled",
+        modelIds: bundled.models.map((model: { model: string }) => model.model),
+      };
     } catch {
-      return { libraryVersion: "unknown", models: 0, collectedAt: "", source: "bundled" };
+      return { libraryVersion: "unknown", models: 0, collectedAt: "", source: "bundled", modelIds: [] };
     }
   }
 

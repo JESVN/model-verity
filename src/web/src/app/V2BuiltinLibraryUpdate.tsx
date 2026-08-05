@@ -230,6 +230,14 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
     }
   };
 
+  const selectCurrentBuiltin = () => {
+    const keep = new Set(selected);
+    for (const model of status?.catalog.models ?? []) {
+      if (model.qualified && currentBuiltinIds.has(model.model)) keep.add(model.model);
+    }
+    setSelected(keep);
+  };
+
   const selectAllQualified = () => {
     setSelected((current) => {
       const next = new Set(current);
@@ -246,9 +254,20 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
     : catalogModels;
   const visibleModels = filteredModels.filter((model) => showUnqualified || model.qualified);
   const catalogApplied = Boolean(status?.catalog.recordId && status.current.recordId === status.catalog.recordId);
+  const currentBuiltinIds = new Set(status?.current.modelIds ?? []);
+  const existingQualified = filteredModels.filter((model) => model.qualified && currentBuiltinIds.has(model.model));
+  const catalogReady = Boolean(status?.catalog.ready && status.catalog.models.length);
+
+  // Auto-select the current built-in models that are present and qualified in the
+  // downloaded dataset, so “refresh my existing samples” does not need per-model clicks.
+  useEffect(() => {
+    if (catalogReady && !catalogApplied && selected.size === 0 && existingQualified.length > 0) {
+      selectCurrentBuiltin();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [catalogReady, catalogApplied, status?.catalog.recordId, status?.catalog.total]);
   const job = status?.prepareJob;
   const jobActive = Boolean(job && (job.status === "queued" || job.status === "running"));
-  const catalogReady = Boolean(status?.catalog.ready && status.catalog.models.length);
   const canRollback = (status?.versions.length ?? 0) > 1;
   const hasChecked = Boolean(status?.latest);
 
@@ -391,6 +410,11 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
                 {trimmedQuery ? `${visibleModels.length} 个匹配` : `${visibleModels.length} 个模型`}
               </span>
               <div className="reference-version-actions">
+                {existingQualified.length > 0 && (
+                  <button className="btn" disabled={applying} onClick={selectCurrentBuiltin}>
+                    勾选现有内置样本（{existingQualified.length}）
+                  </button>
+                )}
                 {unqualifiedCount > 0 && (
                   <button className="btn btn-ghost" onClick={() => setShowUnqualified((current) => !current)}>
                     {showUnqualified ? "隐藏不合格模型" : `显示不合格模型（${unqualifiedCount}）`}
