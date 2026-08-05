@@ -290,13 +290,19 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
         <div className="builtin-status-strip fade-in-soft" role="status" aria-live="polite">
           <div className="builtin-status-cell">
             <span className="builtin-status-label">当前内置库</span>
-            <span className="builtin-status-value">{currentText}</span>
+            <span className="builtin-status-value">
+              {status && <span className={`builtin-source-dot tone-${status.current.source === "runtime" ? "runtime" : "baseline"}`} aria-hidden="true" />}
+              {currentText}
+            </span>
             <span className="builtin-status-dim">{currentSource}</span>
           </div>
           <div className="builtin-status-arrow" aria-hidden="true">→</div>
           <div className="builtin-status-cell">
             <span className="builtin-status-label">Zenodo 最新</span>
-            <span className={`builtin-status-chip tone-${PHASE_TONE[phase]} ${phase === "checking" || phase === "downloading" ? "is-pulsing" : ""}`}>
+            <span className={`builtin-status-chip tone-${PHASE_TONE[phase]}`}>
+              {(phase === "checking" || phase === "downloading") && (
+                <span className="builtin-loading-grid" aria-hidden="true"><span /><span /><span /><span /></span>
+              )}
               {PHASE_COPY[phase]}
             </span>
             <span className="builtin-status-dim">
@@ -313,7 +319,7 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
 
         {/* 发现新版本 -> 下载准备 */}
         {status?.updateAvailable && !catalogReady && !jobActive && (
-          <div className="builtin-update-panel fade-in-soft" key="prepare">
+          <div className="builtin-update-panel is-new fade-in-soft" key="prepare">
             <div className="builtin-update-intro">
               <strong>新数据集已发布</strong>
               <span className="builtin-status-dim">{latestText}</span>
@@ -327,7 +333,7 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
 
         {/* 下载进度 */}
         {jobActive && job && (
-          <div className="builtin-update-panel fade-in-soft" key="progress">
+          <div className="builtin-update-panel is-downloading fade-in-soft" key="progress">
             <div className="builtin-update-progress-row">
               <div className="builtin-update-progress" role="progressbar" aria-valuenow={job.progress} aria-valuemin={0} aria-valuemax={100}>
                 <div className="builtin-update-progress-fill" style={{ width: `${job.progress}%` }} />
