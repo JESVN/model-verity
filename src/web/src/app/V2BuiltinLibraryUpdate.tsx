@@ -231,17 +231,18 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
   };
 
   const selectCurrentBuiltin = () => {
-    const keep = new Set(selected);
-    for (const model of status?.catalog.models ?? []) {
-      if (model.qualified && currentBuiltinIds.has(model.model)) keep.add(model.model);
-    }
-    setSelected(keep);
-  };
-
-  const selectAllQualified = () => {
     setSelected((current) => {
       const next = new Set(current);
-      for (const model of status?.catalog.models ?? []) if (model.qualified) next.add(model.model);
+      for (const model of builtinModels) next.add(model.model);
+      return next;
+    });
+  };
+
+  const toggleGroup = (models: Array<{ model: string; qualified: boolean }>) => {
+    setSelected((current) => {
+      const next = new Set(current);
+      const allSelected = models.every((model) => next.has(model.model));
+      for (const model of models) { if (allSelected) next.delete(model.model); else next.add(model.model); }
       return next;
     });
   };
@@ -252,16 +253,18 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
   const filteredModels = trimmedQuery
     ? catalogModels.filter((model) => model.model.toLowerCase().includes(trimmedQuery))
     : catalogModels;
-  const visibleModels = filteredModels.filter((model) => showUnqualified || model.qualified);
-  const catalogApplied = Boolean(status?.catalog.recordId && status.current.recordId === status.catalog.recordId);
   const currentBuiltinIds = new Set(status?.current.modelIds ?? []);
-  const existingQualified = filteredModels.filter((model) => model.qualified && currentBuiltinIds.has(model.model));
+  const builtinModels = filteredModels.filter((model) => model.qualified && currentBuiltinIds.has(model.model));
+  const newModels = filteredModels.filter((model) => model.qualified && !currentBuiltinIds.has(model.model));
+  const unqualifiedModels = filteredModels.filter((model) => !model.qualified);
+  const selectedIn = (models: typeof catalogModels) => models.filter((model) => selected.has(model.model)).length;
+  const catalogApplied = Boolean(status?.catalog.recordId && status.current.recordId === status.catalog.recordId);
   const catalogReady = Boolean(status?.catalog.ready && status.catalog.models.length);
 
   // Auto-select the current built-in models that are present and qualified in the
   // downloaded dataset, so “refresh my existing samples” does not need per-model clicks.
   useEffect(() => {
-    if (catalogReady && !catalogApplied && selected.size === 0 && existingQualified.length > 0) {
+    if (catalogReady && !catalogApplied && selected.size === 0 && builtinModels.length > 0) {
       selectCurrentBuiltin();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -386,43 +389,79 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
               onChange={(event) => setQuery(event.target.value)}
               spellCheck={false}
             />
-            <div className="builtin-model-list">
-              {visibleModels.map((model) => (
-                <label key={model.model} className={`builtin-model-row ${model.qualified ? "" : "is-disabled"}`}>
-                  <input
-                    type="checkbox"
-                    checked={selected.has(model.model)}
-                    disabled={!model.qualified || applying}
-                    onChange={() => toggleModel(model.model)}
-                  />
-                  <span className="builtin-model-name">{model.model}</span>
-                  {model.qualified
-                    ? <span className="tone-current">合格 · {model.nValid} 有效样本</span>
-                    : <span className="tone-stale">不合格 · 缺 {model.missingCells} cell / 样本不足 {model.belowMinimumCells}</span>}
-                </label>
-              ))}
-              {trimmedQuery && visibleModels.length === 0 && (
-                <div className="builtin-status-dim builtin-empty-hint">没有匹配“{query.trim()}”的模型</div>
-              )}
-            </div>
+            {builtinModels.length > 0 && (
+              <section className="builtin-group">
+                <div className="builtin-group-head">
+                  <strong>更新现有内置样本</strong>
+                  <span className="builtin-status-dim">{selectedIn(builtinModels)}/{builtinModels.length} 已勾选</span>
+                  <button className="btn btn-ghost" disabled={applying} onClick={() => toggleGroup(builtinModels)}>
+                    {builtinModels.every((model) => selected.has(model.model)) ? "清空" : "全选更新"}
+                  </button>
+                </div>
+                <div className="builtin-model-list">
+                  {builtinModels.map((model) => (
+                    <label key={model.model} className="builtin-model-row">
+                      <input type="checkbox" checked={selected.has(model.model)} disabled={applying} onChange={() => toggleModel(model.model)} />
+                      <span className="builtin-model-name">{model.model}</span>
+                      <span className="tone-current">合格 · {model.nValid} 有效样本</span>
+                    </label>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {newModels.length > 0 && (
+              <section className="builtin-group">
+                <div className="builtin-group-head">
+                  <strong>下载新样本（未内置）</strong>
+                  <span className="builtin-status-dim">{selectedIn(newModels)}/{newModels.length} 已勾选</span>
+                  <button className="btn btn-ghost" disabled={applying} onClick={() => toggleGroup(newModels)}>
+                    {newModels.every((model) => selected.has(model.model)) ? "清空" : "全选新增"}
+                  </button>
+                </div>
+                <div className="builtin-model-list">
+                  {newModels.map((model) => (
+                    <label key={model.model} className="builtin-model-row">
+                      <input type="checkbox" checked={selected.has(model.model)} disabled={applying} onChange={() => toggleModel(model.model)} />
+                      <span className="builtin-model-name">{model.model}</span>
+                      <span className="tone-usable">合格 · {model.nValid} 有效样本</span>
+                    </label>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {showUnqualified && unqualifiedModels.length > 0 && (
+              <section className="builtin-group">
+                <div className="builtin-group-head">
+                  <strong>不合格（不可应用）</strong>
+                  <span className="builtin-status-dim">{trimmedQuery ? `${unqualifiedModels.length} 个匹配` : `${unqualifiedModels.length} 个`}</span>
+                </div>
+                <div className="builtin-model-list">
+                  {unqualifiedModels.map((model) => (
+                    <div key={model.model} className="builtin-model-row is-disabled">
+                      <span className="builtin-model-name">{model.model}</span>
+                      <span className="tone-stale">不合格 · 缺 {model.missingCells} cell / 样本不足 {model.belowMinimumCells}</span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {trimmedQuery && builtinModels.length + newModels.length === 0 && (
+              <div className="builtin-status-dim builtin-empty-hint">没有匹配“{query.trim()}”的模型</div>
+            )}
+
             <div className="builtin-list-footer">
               <span className="builtin-status-dim">
-                {trimmedQuery ? `${visibleModels.length} 个匹配` : `${visibleModels.length} 个模型`}
+                {trimmedQuery ? `${builtinModels.length + newModels.length} 个匹配` : `${builtinModels.length + newModels.length} 个合格模型`}
+                {unqualifiedCount > 0 && (
+                  <button className="btn btn-ghost builtin-inline-toggle" onClick={() => setShowUnqualified((current) => !current)}>
+                    {showUnqualified ? "收起不合格" : `显示不合格（${unqualifiedCount}）`}
+                  </button>
+                )}
               </span>
               <div className="reference-version-actions">
-                {existingQualified.length > 0 && (
-                  <button className="btn" disabled={applying} onClick={selectCurrentBuiltin}>
-                    勾选现有内置样本（{existingQualified.length}）
-                  </button>
-                )}
-                {unqualifiedCount > 0 && (
-                  <button className="btn btn-ghost" onClick={() => setShowUnqualified((current) => !current)}>
-                    {showUnqualified ? "隐藏不合格模型" : `显示不合格模型（${unqualifiedCount}）`}
-                  </button>
-                )}
-                <button className="btn" disabled={applying || !selected.size} onClick={selectAllQualified}>
-                  全选合格模型
-                </button>
                 <button className="btn btn-primary" disabled={applying || !selected.size} onClick={() => void applySelected()}>
                   {applying ? "更新中…" : `${copy.apply}（${selected.size}）`}
                 </button>

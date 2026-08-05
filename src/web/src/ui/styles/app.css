@@ -2828,3 +2828,8 @@
 .builtin-update-intro strong { color: var(--brand-300); }
 .builtin-update-progress-meta > span { color: var(--brand-300); font-weight:700; }
 .builtin-update-panel.builtin-update-panel.is-downloading { background: color-mix(in srgb, var(--accent) 6%, transparent); }
+.builtin-group { border-top:1px solid var(--border-strong); padding-top:10px; margin-top:10px; }
+.builtin-group:first-child { border-top:none; margin-top:0; padding-top:0; }
+.builtin-group-head { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:6px; }
+.builtin-group-head strong { font-size:14px; }
+.builtin-inline-toggle { margin-left:8px; padding:2px 8px; font-size:11px; }
