@@ -35,14 +35,10 @@
   "license": "MIT",
   "author": "lennex",
   "files": [
-    "dist",
-    "docs/v2实施计划.md",
-    "docs/v3实施计划.md",
-    "docs/VeriDrop开源仓库研究-20260729.md",
-    "docs/9router-gpt-5.5-验证分析.md",
-    "docs/验证协议.md",
-    "README.md",
-    "LICENSE"
+    "dist/",
+    "docs/",
+    "第三方声明.md",
+    "SECURITY.md"
   ],
   "publishConfig": {
     "registry": "https://registry.npmjs.org",

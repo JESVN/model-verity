@@ -8,6 +8,7 @@ model-verity 是一个验证第三方 AI 服务声明的 CLI + Web 工具：对�
 [![Node](https://img.shields.io/badge/node-%3E%3D20-blue.svg)](package.json)
 [![Zenodo dataset](https://img.shields.io/badge/data-10.5281%2Fzenodo.21278557-blue.svg)](https://doi.org/10.5281/zenodo.21278557)
 
+- 源码仓库：<https://github.com/JESVN/model-verity>（Issues / PR 请前往该仓库）
 - 数据面：`service-claims@3.0.0`；评分规则：`pamela-scorecard@3.1.0`。
 - 内置研究参考：33 个主流厂商当前代模型（claude、openai、gemini、deepseek、kimi、qwen、glm、grok），基于 Zenodo `10.5281/zenodo.21278557`（CC BY 4.0）。
 - 界面与文档以中文为主；`AGENTS.md` 是项目维护规范与证据边界，随仓库公开。
