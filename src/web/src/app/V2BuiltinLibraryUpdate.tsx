@@ -47,6 +47,7 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
   const [checking, setChecking] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [query, setQuery] = useState("");
+  const [showUnqualified, setShowUnqualified] = useState(false);
   const [applying, setApplying] = useState(false);
   const [rollingBack, setRollingBack] = useState(false);
   const [cleaning, setCleaning] = useState(false);
@@ -238,10 +239,12 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
   };
 
   const catalogModels = status?.catalog.models ?? [];
+  const unqualifiedCount = Math.max(0, catalogModels.length - (status?.catalog.qualified ?? 0));
   const trimmedQuery = query.trim().toLowerCase();
   const filteredModels = trimmedQuery
     ? catalogModels.filter((model) => model.model.toLowerCase().includes(trimmedQuery))
     : catalogModels;
+  const visibleModels = filteredModels.filter((model) => showUnqualified || model.qualified);
   const job = status?.prepareJob;
   const jobActive = Boolean(job && (job.status === "queued" || job.status === "running"));
   const catalogReady = Boolean(status?.catalog.ready && status.catalog.models.length);
@@ -363,7 +366,7 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
               spellCheck={false}
             />
             <div className="builtin-model-list">
-              {filteredModels.map((model) => (
+              {visibleModels.map((model) => (
                 <label key={model.model} className={`builtin-model-row ${model.qualified ? "" : "is-disabled"}`}>
                   <input
                     type="checkbox"
@@ -374,18 +377,23 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
                   <span className="builtin-model-name">{model.model}</span>
                   {model.qualified
                     ? <span className="tone-current">合格 · {model.nValid} 有效样本</span>
-                    : <span className="tone-stale">不合格</span>}
+                    : <span className="tone-stale">不合格 · 缺 {model.missingCells} cell / 样本不足 {model.belowMinimumCells}</span>}
                 </label>
               ))}
-              {trimmedQuery && filteredModels.length === 0 && (
+              {trimmedQuery && visibleModels.length === 0 && (
                 <div className="builtin-status-dim builtin-empty-hint">没有匹配“{query.trim()}”的模型</div>
               )}
             </div>
             <div className="builtin-list-footer">
               <span className="builtin-status-dim">
-                {trimmedQuery ? `${filteredModels.length} 个匹配` : `${catalogModels.length} 个模型`}
+                {trimmedQuery ? `${visibleModels.length} 个匹配` : `${visibleModels.length} 个模型`}
               </span>
               <div className="reference-version-actions">
+                {unqualifiedCount > 0 && (
+                  <button className="btn btn-ghost" onClick={() => setShowUnqualified((current) => !current)}>
+                    {showUnqualified ? "隐藏不合格模型" : `显示不合格模型（${unqualifiedCount}）`}
+                  </button>
+                )}
                 <button className="btn" disabled={applying || !selected.size} onClick={selectAllQualified}>
                   全选合格模型
                 </button>
