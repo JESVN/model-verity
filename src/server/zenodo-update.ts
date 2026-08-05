@@ -6,7 +6,7 @@ import { isIP } from "node:net";
 import { basename, join } from "node:path";
 import { Readable } from "node:stream";
 import { gzipSync, gunzipSync } from "node:zlib";
-import { ProxyAgent } from "undici";
+import { Agent, ProxyAgent } from "undici";
 import { open as openZip, type Entry, type ZipFile } from "yauzl";
 import { isPrivateAddress } from "../core/adapters/types.js";
 import { PAMELA_BATTERY } from "../core/battery/pamela.js";
@@ -138,6 +138,7 @@ export class ZenodoUpdateManager {
   private readonly indexFile: string;
   private readonly fetchImpl: typeof fetch;
   private readonly proxyAgent: ProxyAgent | null;
+  private readonly agent: Agent;
   private readonly hostCheck: (rawUrl: string) => Promise<void>;
   private job: ZenodoUpdateJob | null = null;
   private controller: AbortController | null = null;
@@ -151,6 +152,9 @@ export class ZenodoUpdateManager {
     this.hostCheck = options.hostCheck ?? ((rawUrl) => this.assertPublicHost(rawUrl));
     const proxyUrl = process.env.MODEL_VERITY_ZENODO_PROXY?.trim();
     this.proxyAgent = proxyUrl ? new ProxyAgent(proxyUrl) : null;
+    // Direct mode uses a dedicated agent with generous timeouts: large dataset
+    // downloads from slow cross-border links routinely exceed undici's 300s default bodyTimeout.
+    this.agent = new Agent({ headersTimeout: 120_000, bodyTimeout: 0, connectTimeout: 30_000 });
     mkdirSync(this.dir, { recursive: true, mode: 0o700 });
   }
 
@@ -197,7 +201,7 @@ export class ZenodoUpdateManager {
     let url = rawUrl;
     for (let hop = 0; hop < 4; hop += 1) {
       await this.hostCheck(url);
-      const response = await this.fetchImpl(url, { ...init, redirect: "manual", ...(this.proxyAgent ? { dispatcher: this.proxyAgent } : {}) } as RequestInit);
+      const response = await this.fetchImpl(url, { ...init, redirect: "manual", ...(this.proxyAgent ? { dispatcher: this.proxyAgent } : { dispatcher: this.agent }) } as unknown as RequestInit);
       const location = response.headers.get("location");
       if (response.status >= 300 && response.status < 400 && location) {
         await response.body?.cancel?.().catch(() => undefined);
@@ -308,6 +312,24 @@ export class ZenodoUpdateManager {
 
   // ---------- check / status ----------
 
+  private async withRetry<T>(
+    operation: (attempt: number) => Promise<T>,
+    retries: number,
+    onRetry?: (attempt: number, error: unknown) => void,
+  ): Promise<T> {
+    for (let attempt = 0; ; attempt += 1) {
+      try {
+        return await operation(attempt);
+      } catch (error) {
+        if (attempt >= retries || this.controller?.signal?.aborted) throw error;
+        const retryable = error instanceof ZenodoUpdateError ? [502, 503, 504].includes(error.status) : true;
+        if (!retryable) throw error;
+        onRetry?.(attempt, error);
+        await sleep(Math.min(10_000, 2000 * 2 ** attempt), this.controller?.signal);
+      }
+    }
+  }
+
   async check(refresh: boolean): Promise<ZenodoUpdateStatus> {
     const now = Date.now();
     const state = this.state();
@@ -315,7 +337,10 @@ export class ZenodoUpdateManager {
       return this.status();
     }
     try {
-      const record = (await this.fetchJson(`${ZENODO_API_BASE}/${ZENODO_CONCEPT_ID}`)) as ZenodoRecord;
+      const record = await this.withRetry(
+        () => this.fetchJson(`${ZENODO_API_BASE}/${ZENODO_CONCEPT_ID}`) as Promise<ZenodoRecord>,
+        3,
+      );
       const lastSeen = { recordId: String(record.id), version: record.metadata.version, updated: record.updated };
       this.writeState({ ...state, lastSeen, lastCheckedAt: new Date(now).toISOString(), lastError: undefined });
     } catch (error) {
@@ -437,20 +462,30 @@ export class ZenodoUpdateManager {
       const zipPath = this.zipPath(recordId);
       let zipBytes = existsSync(zipPath) ? statSync(zipPath).size : 0;
       if (!existsSync(zipPath)) {
-        const record = (await this.fetchJson(`${ZENODO_API_BASE}/${ZENODO_CONCEPT_ID}`, signal)) as ZenodoRecord;
+        const record = await this.withRetry(
+          () => this.fetchJson(`${ZENODO_API_BASE}/${ZENODO_CONCEPT_ID}`, signal) as Promise<ZenodoRecord>,
+          3,
+          (attempt) => this.setJob({ progress: 5, message: `获取数据集信息失败，第 ${attempt + 1} 次重试…` }),
+        );
         const target = record.files?.find((file) => file.key.toLowerCase().endsWith(".zip"));
         if (!target?.links?.self) throw new ZenodoUpdateError(502, "dataset zip file not found in Zenodo record");
+        const recordZipUrl = target.links!.self;
         mkdirSync(this.downloadsDir, { recursive: true, mode: 0o700 });
         const tmp = `${zipPath}.part`;
-        zipBytes = await this.downloadToFile(target.links.self, tmp, MAX_DATASET_ZIP_BYTES, signal, (bytes, total) => {
-          const percent = total ? Math.min(40, 5 + Math.floor((bytes / total) * 35)) : 5;
-          this.setJob({
-            progress: percent,
-            message: total
-              ? `下载中 ${(bytes / (1024 * 1024)).toFixed(0)} / ${(total / (1024 * 1024)).toFixed(0)} MB`
-              : "下载中…",
-          });
-        });
+        zipBytes = await this.withRetry(
+          () =>
+            this.downloadToFile(recordZipUrl, tmp, MAX_DATASET_ZIP_BYTES, signal, (bytes, total) => {
+              const percent = total ? Math.min(40, 5 + Math.floor((bytes / total) * 35)) : 5;
+              this.setJob({
+                progress: percent,
+                message: total
+                  ? `下载中 ${(bytes / (1024 * 1024)).toFixed(0)} / ${(total / (1024 * 1024)).toFixed(0)} MB`
+                  : "下载中…",
+              });
+            }),
+          2,
+          (attempt) => this.setJob({ progress: 5, message: `下载失败（Zenodo 响应慢），第 ${attempt + 1} 次重试…` }),
+        );
         if (signal?.aborted) { rmSync(tmp, { force: true }); throw new ZenodoUpdateError(409, "canceled"); }
         rmSync(zipPath, { force: true });
         renameSync(tmp, zipPath);
@@ -628,4 +663,12 @@ export class ZenodoUpdateManager {
 function mergeCounts(left: Record<string, number>, right: Record<string, number>): Record<string, number> {
   for (const [key, value] of Object.entries(right)) left[key] = (left[key] ?? 0) + value;
   return left;
+}
+
+function sleep(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) { reject(new ZenodoUpdateError(409, "canceled")); return; }
+    const timer = setTimeout(resolve, ms);
+    signal?.addEventListener("abort", () => { clearTimeout(timer); reject(new ZenodoUpdateError(409, "canceled")); }, { once: true });
+  });
 }

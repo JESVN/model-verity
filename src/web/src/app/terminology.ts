@@ -119,6 +119,7 @@ export function apiErrorMessage(value:string):string {
     [/cancelled by user/i,"任务已由用户取消。"],
     [/run the update check first/i,"请先点击“检查更新”获取最新数据集版本，再执行后续操作。"],
     [/another Zenodo update task is active/i,"已有数据集准备任务在运行，请等待其完成后再次操作。"],
+    [/Zenodo returned HTTP 5\d{2}|HTTP 50\d|Gateway Timeout|504/i,"Zenodo 响应超时或异常（网络慢）。可配置 `MODEL_VERITY_ZENODO_PROXY` 代理后重试，或稍后再试。"],
     [/Zenodo returned HTTP/i,"Zenodo 服务暂时不可用，请稍后重试。"],
     [/resolved to a private address/i,"Zenodo 地址解析到内网或保留地址，已按安全策略拒绝连接。"],
     [/(dataset too large|exceeds \d+ bytes)/i,"数据集超过大小上限，已拒绝下载。请删除缓存后重试。"],

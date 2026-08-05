@@ -119,6 +119,7 @@ interface MockContext {
   metadataCalls: number;
   slow: boolean;
   abortedByClient: boolean;
+  failMetadataCount: number;
 }
 
 async function startMock(): Promise<MockContext> {
@@ -130,11 +131,19 @@ async function startMock(): Promise<MockContext> {
     metadataCalls: 0,
     slow: false,
     abortedByClient: false,
+    failMetadataCount: 0,
   };
   const server = createServer((req, res) => {
     const url = new URL(req.url ?? "/", `http://127.0.0.1:${context.port}`);
     if (url.pathname === "/api/records/21278557") {
       context.metadataCalls += 1;
+      if (context.failMetadataCount > 0) {
+        context.failMetadataCount -= 1;
+        res.statusCode = 504;
+        res.setHeader("content-type", "application/json");
+        res.end(JSON.stringify({ message: "upstream timeout" }));
+        return;
+      }
       res.setHeader("content-type", "application/json");
       res.end(JSON.stringify(context.record));
       return;
@@ -309,6 +318,25 @@ test("Zenodo update: cancel aborts an in-flight download promptly with progress 
     }
     assert.equal(mock.abortedByClient, true, "client should abort the slow download");
     assert.equal(manager.status().cacheBytes, 0, "partial download must be cleaned up");
+  } finally {
+    await (mock as any).closeMock();
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("Zenodo update: transient 504s on the metadata endpoint are retried", async () => {
+  const mock = await startMock();
+  mock.zip = datasetZip(GOOD_MANIFEST, [["openai/gpt-5.6-sol", 12]]);
+  mock.failMetadataCount = 2; // first two metadata requests return 504
+  const dir = await mkdtemp(join(tmpdir(), "mv-zenodo-retry-"));
+  const manager = makeManager(dir, mock);
+  try {
+    const checked = await manager.check(true);
+    assert.equal(checked.latest?.recordId, "900001");
+    assert.equal(mock.metadataCalls, 3, "should retry until success");
+    manager.prepare();
+    const prepared = await waitJob(manager);
+    assert.equal(prepared.prepareJob?.status, "done", prepared.prepareJob?.error ?? "prepare failed");
   } finally {
     await (mock as any).closeMock();
     await rm(dir, { recursive: true, force: true });
