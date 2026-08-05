@@ -1,0 +1,8 @@
+# Normalize line endings for all tracked text files.
+* text=auto eol=lf
+
+# Binary data / fingerprints are never diffed textually.
+*.gz binary
+src/data/*.gz binary
+
+# Documentation and source use LF only (already enforced above).

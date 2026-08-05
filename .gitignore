@@ -1,0 +1,10 @@
+node_modules/
+dist/
+pamela-publish-data/
+.DS_Store
+*.log
+.env
+.env.*
+.vite/
+# Redundant 146-model backup; original data is recoverable from Zenodo.
+src/data/*.bak-146

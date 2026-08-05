@@ -1,0 +1,3192 @@
+{
+  "batchId": "M8-AICODE-RESPONSES-2026-07-28T09:02:19.217Z",
+  "createdAt": "2026-07-28T09:02:19.217Z",
+  "protocol": {
+    "reference": "openai-responses",
+    "target": "openai-responses",
+    "comparability": "P1-schema-candidate/P2-surface",
+    "longTermStability": "not_assessed",
+    "retries": 0
+  },
+  "budget": {
+    "limits": {
+      "9router": {
+        "requests": 40,
+        "input": 22000,
+        "output": 1000
+      },
+      "AiCodeWith": {
+        "requests": 40,
+        "input": 35000,
+        "output": 1000
+      }
+    },
+    "used": {
+      "9router": {
+        "requests": 40,
+        "input": 18132,
+        "output": 268
+      },
+      "AiCodeWith": {
+        "requests": 40,
+        "input": 2652,
+        "output": 268
+      }
+    }
+  },
+  "score": 0.3419520216150848,
+  "distances": [
+    {
+      "cellId": "en:city-random",
+      "jsd": 0.523778860398527,
+      "referenceValid": 10,
+      "targetValid": 10
+    },
+    {
+      "cellId": "ru:animal-random",
+      "jsd": 0,
+      "referenceValid": 10,
+      "targetValid": 10
+    },
+    {
+      "cellId": "zh:word-random",
+      "jsd": 0.35726235138633244,
+      "referenceValid": 10,
+      "targetValid": 10
+    },
+    {
+      "cellId": "ar:word-random",
+      "jsd": 0.48676687467547985,
+      "referenceValid": 10,
+      "targetValid": 10
+    }
+  ],
+  "completePairs": 40,
+  "totalPairs": 40,
+  "startGapP95": 0.9688239999995858,
+  "observations": [
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "en:city-random",
+      "repetition": 0,
+      "requestHash": "2d330e4190aad101a211c1aa77aa89609a4975fcd06169403573e0f6b5a2e06b",
+      "startedAt": "2026-07-28T09:00:15.948Z",
+      "finishedAt": "2026-07-28T09:00:18.997Z",
+      "latencyMs": 3048.986479,
+      "validity": "valid",
+      "category": "lisbon",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 450,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "en:city-random",
+      "repetition": 0,
+      "requestHash": "2d330e4190aad101a211c1aa77aa89609a4975fcd06169403573e0f6b5a2e06b",
+      "startedAt": "2026-07-28T09:00:15.919Z",
+      "finishedAt": "2026-07-28T09:00:18.986Z",
+      "latencyMs": 3063.745335,
+      "validity": "valid",
+      "category": "marrakesh",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 63,
+        "outputTokens": 8
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "en:city-random",
+      "repetition": 1,
+      "requestHash": "c346aadb0321e3942e82071095a55253b90856197e26b12f36b7eb89d1014e2b",
+      "startedAt": "2026-07-28T09:00:18.998Z",
+      "finishedAt": "2026-07-28T09:00:20.927Z",
+      "latencyMs": 1928.675565,
+      "validity": "valid",
+      "category": "lisbon",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 449,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "en:city-random",
+      "repetition": 1,
+      "requestHash": "c346aadb0321e3942e82071095a55253b90856197e26b12f36b7eb89d1014e2b",
+      "startedAt": "2026-07-28T09:00:18.997Z",
+      "finishedAt": "2026-07-28T09:00:25.613Z",
+      "latencyMs": 6615.370690999999,
+      "validity": "valid",
+      "category": "valencia",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 62,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "en:city-random",
+      "repetition": 2,
+      "requestHash": "4a6be02b2e628ec67ee9e79a3ddb23be6fafc8f37773a2b76668088d09b9ff8b",
+      "startedAt": "2026-07-28T09:00:25.613Z",
+      "finishedAt": "2026-07-28T09:00:27.333Z",
+      "latencyMs": 1719.3439429999999,
+      "validity": "valid",
+      "category": "lisbon",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 449,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "en:city-random",
+      "repetition": 2,
+      "requestHash": "4a6be02b2e628ec67ee9e79a3ddb23be6fafc8f37773a2b76668088d09b9ff8b",
+      "startedAt": "2026-07-28T09:00:25.614Z",
+      "finishedAt": "2026-07-28T09:00:28.092Z",
+      "latencyMs": 2477.272965,
+      "validity": "valid",
+      "category": "marrakesh",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 62,
+        "outputTokens": 8
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "en:city-random",
+      "repetition": 3,
+      "requestHash": "2af4abeebad6602f609963b49347b212700d1f580091346619dd7ee952db4507",
+      "startedAt": "2026-07-28T09:00:28.092Z",
+      "finishedAt": "2026-07-28T09:00:31.348Z",
+      "latencyMs": 3255.7002319999992,
+      "validity": "valid",
+      "category": "lisbon",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 447,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "en:city-random",
+      "repetition": 3,
+      "requestHash": "2af4abeebad6602f609963b49347b212700d1f580091346619dd7ee952db4507",
+      "startedAt": "2026-07-28T09:00:28.092Z",
+      "finishedAt": "2026-07-28T09:00:30.512Z",
+      "latencyMs": 2419.9592059999995,
+      "validity": "valid",
+      "category": "melbourne",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 60,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "en:city-random",
+      "repetition": 4,
+      "requestHash": "4b72515f3827c9706c0bb247e76b77fce2ccd227afef963468f719debbc54c7d",
+      "startedAt": "2026-07-28T09:00:31.350Z",
+      "finishedAt": "2026-07-28T09:00:34.878Z",
+      "latencyMs": 3528.110236999999,
+      "validity": "valid",
+      "category": "lisbon",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 449,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "en:city-random",
+      "repetition": 4,
+      "requestHash": "4b72515f3827c9706c0bb247e76b77fce2ccd227afef963468f719debbc54c7d",
+      "startedAt": "2026-07-28T09:00:31.348Z",
+      "finishedAt": "2026-07-28T09:00:33.236Z",
+      "latencyMs": 1887.1852469999994,
+      "validity": "valid",
+      "category": "marrakesh",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 62,
+        "outputTokens": 8
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "en:city-random",
+      "repetition": 5,
+      "requestHash": "a9351c1c8773b2b3f330eda4fc0233045b59f7fb618ecda7179c9a774d707dbc",
+      "startedAt": "2026-07-28T09:00:34.878Z",
+      "finishedAt": "2026-07-28T09:00:36.993Z",
+      "latencyMs": 2114.9089050000002,
+      "validity": "valid",
+      "category": "lisbon",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 448,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "en:city-random",
+      "repetition": 5,
+      "requestHash": "a9351c1c8773b2b3f330eda4fc0233045b59f7fb618ecda7179c9a774d707dbc",
+      "startedAt": "2026-07-28T09:00:34.879Z",
+      "finishedAt": "2026-07-28T09:00:36.878Z",
+      "latencyMs": 1998.843886999999,
+      "validity": "valid",
+      "category": "kyoto",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 61,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "en:city-random",
+      "repetition": 6,
+      "requestHash": "524e79f543ad73ade53c60e885c55f4b572373790bf098d9c5aaed7425eb3eb1",
+      "startedAt": "2026-07-28T09:00:36.994Z",
+      "finishedAt": "2026-07-28T09:00:38.827Z",
+      "latencyMs": 1832.366688000002,
+      "validity": "valid",
+      "category": "lisbon",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 447,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "en:city-random",
+      "repetition": 6,
+      "requestHash": "524e79f543ad73ade53c60e885c55f4b572373790bf098d9c5aaed7425eb3eb1",
+      "startedAt": "2026-07-28T09:00:36.994Z",
+      "finishedAt": "2026-07-28T09:00:40.748Z",
+      "latencyMs": 3753.7334319999973,
+      "validity": "valid",
+      "category": "oslo",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 60,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "en:city-random",
+      "repetition": 7,
+      "requestHash": "c534ecdb7ea73058567eb71d5d056d1cda8f0c24e80a15eab52721c63bc5cd33",
+      "startedAt": "2026-07-28T09:00:40.748Z",
+      "finishedAt": "2026-07-28T09:00:46.355Z",
+      "latencyMs": 5606.771078999998,
+      "validity": "valid",
+      "category": "lisbon",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 446,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "en:city-random",
+      "repetition": 7,
+      "requestHash": "c534ecdb7ea73058567eb71d5d056d1cda8f0c24e80a15eab52721c63bc5cd33",
+      "startedAt": "2026-07-28T09:00:40.748Z",
+      "finishedAt": "2026-07-28T09:00:43.506Z",
+      "latencyMs": 2757.4456809999974,
+      "validity": "valid",
+      "category": "lisbon",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 59,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "en:city-random",
+      "repetition": 8,
+      "requestHash": "ad4af96019c6ffc889f4c4f78bd6bd38d477b667cc977ec5b966cb31dd1e9cdd",
+      "startedAt": "2026-07-28T09:00:46.355Z",
+      "finishedAt": "2026-07-28T09:00:48.061Z",
+      "latencyMs": 1705.488773000001,
+      "validity": "valid",
+      "category": "lisbon",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 447,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "en:city-random",
+      "repetition": 8,
+      "requestHash": "ad4af96019c6ffc889f4c4f78bd6bd38d477b667cc977ec5b966cb31dd1e9cdd",
+      "startedAt": "2026-07-28T09:00:46.355Z",
+      "finishedAt": "2026-07-28T09:00:47.946Z",
+      "latencyMs": 1591.5863250000002,
+      "validity": "valid",
+      "category": "lisbon",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 60,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "en:city-random",
+      "repetition": 9,
+      "requestHash": "494d8bae2248018d9a63e204dd014ccc6e72cdf7e715f2b6f5830fa5cf37929f",
+      "startedAt": "2026-07-28T09:00:48.061Z",
+      "finishedAt": "2026-07-28T09:00:51.025Z",
+      "latencyMs": 2963.636112,
+      "validity": "valid",
+      "category": "valencia",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 448,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "en:city-random",
+      "repetition": 9,
+      "requestHash": "494d8bae2248018d9a63e204dd014ccc6e72cdf7e715f2b6f5830fa5cf37929f",
+      "startedAt": "2026-07-28T09:00:48.061Z",
+      "finishedAt": "2026-07-28T09:00:50.383Z",
+      "latencyMs": 2321.543178,
+      "validity": "valid",
+      "category": "kyoto",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 61,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "ru:animal-random",
+      "repetition": 0,
+      "requestHash": "0ec972d69be90b96f563c655fa9c6d9c2b998e07a4487e12c9b92dff513d615e",
+      "startedAt": "2026-07-28T09:00:51.025Z",
+      "finishedAt": "2026-07-28T09:00:52.292Z",
+      "latencyMs": 1266.141343000003,
+      "validity": "valid",
+      "category": "капибара",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 459,
+        "outputTokens": 8
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "ru:animal-random",
+      "repetition": 0,
+      "requestHash": "0ec972d69be90b96f563c655fa9c6d9c2b998e07a4487e12c9b92dff513d615e",
+      "startedAt": "2026-07-28T09:00:51.025Z",
+      "finishedAt": "2026-07-28T09:00:52.831Z",
+      "latencyMs": 1805.7779609999998,
+      "validity": "valid",
+      "category": "капибара",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 72,
+        "outputTokens": 8
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "ru:animal-random",
+      "repetition": 1,
+      "requestHash": "14a7905ae9639f94815796cd682493af28c21cd4b5cf778f2fce07fa6f74e0ca",
+      "startedAt": "2026-07-28T09:00:52.832Z",
+      "finishedAt": "2026-07-28T09:00:54.438Z",
+      "latencyMs": 1606.3796350000048,
+      "validity": "valid",
+      "category": "капибара",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 458,
+        "outputTokens": 8
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "ru:animal-random",
+      "repetition": 1,
+      "requestHash": "14a7905ae9639f94815796cd682493af28c21cd4b5cf778f2fce07fa6f74e0ca",
+      "startedAt": "2026-07-28T09:00:52.831Z",
+      "finishedAt": "2026-07-28T09:00:54.531Z",
+      "latencyMs": 1699.4390490000005,
+      "validity": "valid",
+      "category": "капибара",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 71,
+        "outputTokens": 8
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "ru:animal-random",
+      "repetition": 2,
+      "requestHash": "54044ef49160bdb78e90ad8244b9a2be02d30347640b7ee436a8e2f6052b6335",
+      "startedAt": "2026-07-28T09:00:54.531Z",
+      "finishedAt": "2026-07-28T09:00:56.185Z",
+      "latencyMs": 1653.8138410000029,
+      "validity": "valid",
+      "category": "капибара",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 461,
+        "outputTokens": 8
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "ru:animal-random",
+      "repetition": 2,
+      "requestHash": "54044ef49160bdb78e90ad8244b9a2be02d30347640b7ee436a8e2f6052b6335",
+      "startedAt": "2026-07-28T09:00:54.532Z",
+      "finishedAt": "2026-07-28T09:00:57.461Z",
+      "latencyMs": 2929.535981999994,
+      "validity": "valid",
+      "category": "капибара",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 74,
+        "outputTokens": 8
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "ru:animal-random",
+      "repetition": 3,
+      "requestHash": "a78d6f54888fc61bb3506bf9df772c77b9be6efa664c5bddef9c0e39825f0210",
+      "startedAt": "2026-07-28T09:00:57.462Z",
+      "finishedAt": "2026-07-28T09:01:00.997Z",
+      "latencyMs": 3534.5347399999955,
+      "validity": "valid",
+      "category": "капибара",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 458,
+        "outputTokens": 8
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "ru:animal-random",
+      "repetition": 3,
+      "requestHash": "a78d6f54888fc61bb3506bf9df772c77b9be6efa664c5bddef9c0e39825f0210",
+      "startedAt": "2026-07-28T09:00:57.462Z",
+      "finishedAt": "2026-07-28T09:01:00.455Z",
+      "latencyMs": 2993.212535000006,
+      "validity": "valid",
+      "category": "капибара",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 71,
+        "outputTokens": 8
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "ru:animal-random",
+      "repetition": 4,
+      "requestHash": "9254512139fc93cf9f5a8b1706c53aef18d2901503db5fd6bfac08078a3478c5",
+      "startedAt": "2026-07-28T09:01:00.997Z",
+      "finishedAt": "2026-07-28T09:01:04.011Z",
+      "latencyMs": 3013.5962040000013,
+      "validity": "valid",
+      "category": "капибара",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 458,
+        "outputTokens": 8
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "ru:animal-random",
+      "repetition": 4,
+      "requestHash": "9254512139fc93cf9f5a8b1706c53aef18d2901503db5fd6bfac08078a3478c5",
+      "startedAt": "2026-07-28T09:01:00.997Z",
+      "finishedAt": "2026-07-28T09:01:07.559Z",
+      "latencyMs": 6561.087812000005,
+      "validity": "valid",
+      "category": "капибара",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 71,
+        "outputTokens": 8
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "ru:animal-random",
+      "repetition": 5,
+      "requestHash": "63ec8e2470fd347ab6176e0edded3a9a85bfe46d0d93012750bc68be6d72f7ef",
+      "startedAt": "2026-07-28T09:01:07.559Z",
+      "finishedAt": "2026-07-28T09:01:11.411Z",
+      "latencyMs": 3851.027277000001,
+      "validity": "valid",
+      "category": "капибара",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 460,
+        "outputTokens": 8
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "ru:animal-random",
+      "repetition": 5,
+      "requestHash": "63ec8e2470fd347ab6176e0edded3a9a85bfe46d0d93012750bc68be6d72f7ef",
+      "startedAt": "2026-07-28T09:01:07.559Z",
+      "finishedAt": "2026-07-28T09:01:09.926Z",
+      "latencyMs": 2366.758740999998,
+      "validity": "valid",
+      "category": "капибара",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 73,
+        "outputTokens": 8
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "ru:animal-random",
+      "repetition": 6,
+      "requestHash": "ed63bce9e9772e75f1d35b59e03ec16b232d7c52a9e7a97b54cd7d3e5bb86f96",
+      "startedAt": "2026-07-28T09:01:11.411Z",
+      "finishedAt": "2026-07-28T09:01:13.052Z",
+      "latencyMs": 1640.6976819999982,
+      "validity": "valid",
+      "category": "капибара",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 460,
+        "outputTokens": 8
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "ru:animal-random",
+      "repetition": 6,
+      "requestHash": "ed63bce9e9772e75f1d35b59e03ec16b232d7c52a9e7a97b54cd7d3e5bb86f96",
+      "startedAt": "2026-07-28T09:01:11.411Z",
+      "finishedAt": "2026-07-28T09:01:15.032Z",
+      "latencyMs": 3620.422799,
+      "validity": "valid",
+      "category": "капибара",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 73,
+        "outputTokens": 8
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "ru:animal-random",
+      "repetition": 7,
+      "requestHash": "e09791a462ba995439af3ba994f76233a53105d98a7bbc31064f321cc518aa07",
+      "startedAt": "2026-07-28T09:01:15.032Z",
+      "finishedAt": "2026-07-28T09:01:16.580Z",
+      "latencyMs": 1547.7844809999951,
+      "validity": "valid",
+      "category": "капибара",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 460,
+        "outputTokens": 8
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "ru:animal-random",
+      "repetition": 7,
+      "requestHash": "e09791a462ba995439af3ba994f76233a53105d98a7bbc31064f321cc518aa07",
+      "startedAt": "2026-07-28T09:01:15.032Z",
+      "finishedAt": "2026-07-28T09:01:17.438Z",
+      "latencyMs": 2405.763444999997,
+      "validity": "valid",
+      "category": "капибара",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 73,
+        "outputTokens": 8
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "ru:animal-random",
+      "repetition": 8,
+      "requestHash": "5a1d8e580a6227245a663cab89160293c84be920e1fd085ff5e560b7f8dd4b91",
+      "startedAt": "2026-07-28T09:01:17.438Z",
+      "finishedAt": "2026-07-28T09:01:18.634Z",
+      "latencyMs": 1195.5022099999987,
+      "validity": "valid",
+      "category": "капибара",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 461,
+        "outputTokens": 8
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "ru:animal-random",
+      "repetition": 8,
+      "requestHash": "5a1d8e580a6227245a663cab89160293c84be920e1fd085ff5e560b7f8dd4b91",
+      "startedAt": "2026-07-28T09:01:17.438Z",
+      "finishedAt": "2026-07-28T09:01:19.572Z",
+      "latencyMs": 2133.729892999996,
+      "validity": "valid",
+      "category": "капибара",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 74,
+        "outputTokens": 8
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "ru:animal-random",
+      "repetition": 9,
+      "requestHash": "0d677571b3d521b4396a4ecf1ef9186d906d8d4c766835f65e3d0900f735feae",
+      "startedAt": "2026-07-28T09:01:19.572Z",
+      "finishedAt": "2026-07-28T09:01:20.921Z",
+      "latencyMs": 1348.9585129999978,
+      "validity": "valid",
+      "category": "капибара",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 459,
+        "outputTokens": 8
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "ru:animal-random",
+      "repetition": 9,
+      "requestHash": "0d677571b3d521b4396a4ecf1ef9186d906d8d4c766835f65e3d0900f735feae",
+      "startedAt": "2026-07-28T09:01:19.572Z",
+      "finishedAt": "2026-07-28T09:01:24.472Z",
+      "latencyMs": 4899.817719000006,
+      "validity": "valid",
+      "category": "капибара",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 72,
+        "outputTokens": 8
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "zh:word-random",
+      "repetition": 0,
+      "requestHash": "07fbdb84fa455113d35435b88862e23d2ff633bd3450d34a22f3eeaa6f454ee0",
+      "startedAt": "2026-07-28T09:01:24.472Z",
+      "finishedAt": "2026-07-28T09:01:25.680Z",
+      "latencyMs": 1206.9296540000068,
+      "validity": "valid",
+      "category": "星河",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 454,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "zh:word-random",
+      "repetition": 0,
+      "requestHash": "07fbdb84fa455113d35435b88862e23d2ff633bd3450d34a22f3eeaa6f454ee0",
+      "startedAt": "2026-07-28T09:01:24.472Z",
+      "finishedAt": "2026-07-28T09:01:29.516Z",
+      "latencyMs": 5044.219798999999,
+      "validity": "valid",
+      "category": "星辰",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 67,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "zh:word-random",
+      "repetition": 1,
+      "requestHash": "f9e103b69b61d15bfea1316e223934878f74a59d2400226dffa1cd83f171fa29",
+      "startedAt": "2026-07-28T09:01:29.517Z",
+      "finishedAt": "2026-07-28T09:01:31.027Z",
+      "latencyMs": 1509.9231599999912,
+      "validity": "valid",
+      "category": "星辰",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 452,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "zh:word-random",
+      "repetition": 1,
+      "requestHash": "f9e103b69b61d15bfea1316e223934878f74a59d2400226dffa1cd83f171fa29",
+      "startedAt": "2026-07-28T09:01:29.516Z",
+      "finishedAt": "2026-07-28T09:01:31.391Z",
+      "latencyMs": 1874.8181369999947,
+      "validity": "valid",
+      "category": "星河",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 65,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "zh:word-random",
+      "repetition": 2,
+      "requestHash": "702373217908139d44154389007bfcfc91da0c122b3880e6d33ed453a8d68c84",
+      "startedAt": "2026-07-28T09:01:31.392Z",
+      "finishedAt": "2026-07-28T09:01:32.879Z",
+      "latencyMs": 1486.579911000008,
+      "validity": "valid",
+      "category": "星辰",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 450,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "zh:word-random",
+      "repetition": 2,
+      "requestHash": "702373217908139d44154389007bfcfc91da0c122b3880e6d33ed453a8d68c84",
+      "startedAt": "2026-07-28T09:01:31.391Z",
+      "finishedAt": "2026-07-28T09:01:33.439Z",
+      "latencyMs": 2047.394827000011,
+      "validity": "valid",
+      "category": "星河",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 63,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "zh:word-random",
+      "repetition": 3,
+      "requestHash": "64b1c30aa034e7379110fc468dfadd68a5992ec0292bd7a78e62831c91dc5cc8",
+      "startedAt": "2026-07-28T09:01:33.439Z",
+      "finishedAt": "2026-07-28T09:01:36.670Z",
+      "latencyMs": 3231.114102000007,
+      "validity": "valid",
+      "category": "星辰",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 455,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "zh:word-random",
+      "repetition": 3,
+      "requestHash": "64b1c30aa034e7379110fc468dfadd68a5992ec0292bd7a78e62831c91dc5cc8",
+      "startedAt": "2026-07-28T09:01:33.440Z",
+      "finishedAt": "2026-07-28T09:01:35.158Z",
+      "latencyMs": 1717.867769999997,
+      "validity": "valid",
+      "category": "星云",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 68,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "zh:word-random",
+      "repetition": 4,
+      "requestHash": "f84ea0502a2d6ba55ddcd4b693f313eef7d7af5b33ccffd29bc6de28be43890a",
+      "startedAt": "2026-07-28T09:01:36.671Z",
+      "finishedAt": "2026-07-28T09:01:38.357Z",
+      "latencyMs": 1686.1901809999981,
+      "validity": "valid",
+      "category": "海洋",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 452,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "zh:word-random",
+      "repetition": 4,
+      "requestHash": "f84ea0502a2d6ba55ddcd4b693f313eef7d7af5b33ccffd29bc6de28be43890a",
+      "startedAt": "2026-07-28T09:01:36.671Z",
+      "finishedAt": "2026-07-28T09:01:38.212Z",
+      "latencyMs": 1540.8958739999944,
+      "validity": "valid",
+      "category": "星河",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 65,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "zh:word-random",
+      "repetition": 5,
+      "requestHash": "28ceffc801485788d58310d6e2081a277ac961d55df24489baa92170aa5cd46c",
+      "startedAt": "2026-07-28T09:01:38.358Z",
+      "finishedAt": "2026-07-28T09:01:40.023Z",
+      "latencyMs": 1665.3181089999998,
+      "validity": "valid",
+      "category": "流星",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 453,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "zh:word-random",
+      "repetition": 5,
+      "requestHash": "28ceffc801485788d58310d6e2081a277ac961d55df24489baa92170aa5cd46c",
+      "startedAt": "2026-07-28T09:01:38.357Z",
+      "finishedAt": "2026-07-28T09:01:39.698Z",
+      "latencyMs": 1340.012447999994,
+      "validity": "valid",
+      "category": "星尘",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 66,
+        "outputTokens": 7
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "zh:word-random",
+      "repetition": 6,
+      "requestHash": "eb371d25137aed96575aa0dfaa5c1891c4fb045cf9043e97d32d9b2858ccf5d2",
+      "startedAt": "2026-07-28T09:01:40.024Z",
+      "finishedAt": "2026-07-28T09:01:41.258Z",
+      "latencyMs": 1233.7635119999904,
+      "validity": "valid",
+      "category": "星河",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 453,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "zh:word-random",
+      "repetition": 6,
+      "requestHash": "eb371d25137aed96575aa0dfaa5c1891c4fb045cf9043e97d32d9b2858ccf5d2",
+      "startedAt": "2026-07-28T09:01:40.023Z",
+      "finishedAt": "2026-07-28T09:01:42.426Z",
+      "latencyMs": 2401.9677740000043,
+      "validity": "valid",
+      "category": "星辰",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 66,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "zh:word-random",
+      "repetition": 7,
+      "requestHash": "3245825f2d2b512da7ef2d7e144dfc789f4a8030260104121acaf290cfe85327",
+      "startedAt": "2026-07-28T09:01:42.426Z",
+      "finishedAt": "2026-07-28T09:01:44.998Z",
+      "latencyMs": 2571.7675889999955,
+      "validity": "valid",
+      "category": "琥珀",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 453,
+        "outputTokens": 8
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "zh:word-random",
+      "repetition": 7,
+      "requestHash": "3245825f2d2b512da7ef2d7e144dfc789f4a8030260104121acaf290cfe85327",
+      "startedAt": "2026-07-28T09:01:42.426Z",
+      "finishedAt": "2026-07-28T09:01:44.470Z",
+      "latencyMs": 2043.5787750000018,
+      "validity": "valid",
+      "category": "星云",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 66,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "zh:word-random",
+      "repetition": 8,
+      "requestHash": "4c12860f1ad28028595c1b8135ad3c51d3290f1a237e76c85b797e57610d6b82",
+      "startedAt": "2026-07-28T09:01:44.998Z",
+      "finishedAt": "2026-07-28T09:01:47.026Z",
+      "latencyMs": 2028.1780049999943,
+      "validity": "valid",
+      "category": "星河",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 451,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "zh:word-random",
+      "repetition": 8,
+      "requestHash": "4c12860f1ad28028595c1b8135ad3c51d3290f1a237e76c85b797e57610d6b82",
+      "startedAt": "2026-07-28T09:01:44.998Z",
+      "finishedAt": "2026-07-28T09:01:47.232Z",
+      "latencyMs": 2233.752185999998,
+      "validity": "valid",
+      "category": "星云",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 64,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "zh:word-random",
+      "repetition": 9,
+      "requestHash": "14247e55c4ecc52f2e691cfe2a3c831b30c836f89424daefb588d744adbd41e1",
+      "startedAt": "2026-07-28T09:01:47.232Z",
+      "finishedAt": "2026-07-28T09:01:48.777Z",
+      "latencyMs": 1545.1470739999932,
+      "validity": "valid",
+      "category": "星河",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 454,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "zh:word-random",
+      "repetition": 9,
+      "requestHash": "14247e55c4ecc52f2e691cfe2a3c831b30c836f89424daefb588d744adbd41e1",
+      "startedAt": "2026-07-28T09:01:47.232Z",
+      "finishedAt": "2026-07-28T09:01:51.645Z",
+      "latencyMs": 4412.252281000008,
+      "validity": "valid",
+      "category": "星河",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 67,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "ar:word-random",
+      "repetition": 0,
+      "requestHash": "c59535ac09d26509b71646a9a46d5e94e92338bdcdb720af3e5f87d2cdae39d8",
+      "startedAt": "2026-07-28T09:01:51.646Z",
+      "finishedAt": "2026-07-28T09:01:54.355Z",
+      "latencyMs": 2708.751071000006,
+      "validity": "valid",
+      "category": "برتقالة",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 451,
+        "outputTokens": 7
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "ar:word-random",
+      "repetition": 0,
+      "requestHash": "c59535ac09d26509b71646a9a46d5e94e92338bdcdb720af3e5f87d2cdae39d8",
+      "startedAt": "2026-07-28T09:01:51.645Z",
+      "finishedAt": "2026-07-28T09:01:53.985Z",
+      "latencyMs": 2339.7771680000005,
+      "validity": "valid",
+      "category": "تفاحة",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 64,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "ar:word-random",
+      "repetition": 1,
+      "requestHash": "776a0f359d8317019d6392699398678e4560f46f69e044717bc4b1e87b439707",
+      "startedAt": "2026-07-28T09:01:54.355Z",
+      "finishedAt": "2026-07-28T09:01:55.908Z",
+      "latencyMs": 1553.5021209999977,
+      "validity": "valid",
+      "category": "موزة",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 455,
+        "outputTokens": 7
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "ar:word-random",
+      "repetition": 1,
+      "requestHash": "776a0f359d8317019d6392699398678e4560f46f69e044717bc4b1e87b439707",
+      "startedAt": "2026-07-28T09:01:54.355Z",
+      "finishedAt": "2026-07-28T09:01:58.515Z",
+      "latencyMs": 4160.226383999994,
+      "validity": "valid",
+      "category": "غيمة",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 68,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "ar:word-random",
+      "repetition": 2,
+      "requestHash": "dacaeeee0f71dbc8a23b07757ada28b3ac9b4d699793706388c619c250760990",
+      "startedAt": "2026-07-28T09:01:58.516Z",
+      "finishedAt": "2026-07-28T09:02:00.106Z",
+      "latencyMs": 1589.6927320000104,
+      "validity": "valid",
+      "category": "مطر",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 453,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "ar:word-random",
+      "repetition": 2,
+      "requestHash": "dacaeeee0f71dbc8a23b07757ada28b3ac9b4d699793706388c619c250760990",
+      "startedAt": "2026-07-28T09:01:58.516Z",
+      "finishedAt": "2026-07-28T09:02:00.181Z",
+      "latencyMs": 1665.702038000003,
+      "validity": "valid",
+      "category": "مجرة",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 66,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "ar:word-random",
+      "repetition": 3,
+      "requestHash": "f98f344f3f0c6778ad292f08bd9213088fa4f11bc65441d22353adfd6bcac4cc",
+      "startedAt": "2026-07-28T09:02:00.182Z",
+      "finishedAt": "2026-07-28T09:02:01.627Z",
+      "latencyMs": 1444.902120999992,
+      "validity": "valid",
+      "category": "برتقالة",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 452,
+        "outputTokens": 7
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "ar:word-random",
+      "repetition": 3,
+      "requestHash": "f98f344f3f0c6778ad292f08bd9213088fa4f11bc65441d22353adfd6bcac4cc",
+      "startedAt": "2026-07-28T09:02:00.182Z",
+      "finishedAt": "2026-07-28T09:02:02.059Z",
+      "latencyMs": 1876.9156280000025,
+      "validity": "valid",
+      "category": "مجرة",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 65,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "ar:word-random",
+      "repetition": 4,
+      "requestHash": "d48bae60c41c5b88fe5e84b3ce84dbd66742382ab083d99547c7d1e7597e6a0a",
+      "startedAt": "2026-07-28T09:02:02.059Z",
+      "finishedAt": "2026-07-28T09:02:06.872Z",
+      "latencyMs": 4812.085765000011,
+      "validity": "valid",
+      "category": "مطر",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 454,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "ar:word-random",
+      "repetition": 4,
+      "requestHash": "d48bae60c41c5b88fe5e84b3ce84dbd66742382ab083d99547c7d1e7597e6a0a",
+      "startedAt": "2026-07-28T09:02:02.059Z",
+      "finishedAt": "2026-07-28T09:02:04.774Z",
+      "latencyMs": 2714.9770080000017,
+      "validity": "valid",
+      "category": "مطر",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 67,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "ar:word-random",
+      "repetition": 5,
+      "requestHash": "a83050aa6440a4fa584e6c650d4c4f3b09566255b255ffb0ae2692e840012e49",
+      "startedAt": "2026-07-28T09:02:06.872Z",
+      "finishedAt": "2026-07-28T09:02:09.540Z",
+      "latencyMs": 2667.901960999996,
+      "validity": "valid",
+      "category": "موزة",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 453,
+        "outputTokens": 7
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "ar:word-random",
+      "repetition": 5,
+      "requestHash": "a83050aa6440a4fa584e6c650d4c4f3b09566255b255ffb0ae2692e840012e49",
+      "startedAt": "2026-07-28T09:02:06.872Z",
+      "finishedAt": "2026-07-28T09:02:09.613Z",
+      "latencyMs": 2740.5804819999903,
+      "validity": "valid",
+      "category": "مطر",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 66,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "ar:word-random",
+      "repetition": 6,
+      "requestHash": "7e015aaaeeb67d92358af2518f045fa5b53d8b6593184645fce387366fbaf865",
+      "startedAt": "2026-07-28T09:02:09.613Z",
+      "finishedAt": "2026-07-28T09:02:10.935Z",
+      "latencyMs": 1321.5971870000067,
+      "validity": "valid",
+      "category": "مظلة",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 451,
+        "outputTokens": 7
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "ar:word-random",
+      "repetition": 6,
+      "requestHash": "7e015aaaeeb67d92358af2518f045fa5b53d8b6593184645fce387366fbaf865",
+      "startedAt": "2026-07-28T09:02:09.613Z",
+      "finishedAt": "2026-07-28T09:02:11.524Z",
+      "latencyMs": 1911.0021899999992,
+      "validity": "valid",
+      "category": "شجرة",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 64,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "ar:word-random",
+      "repetition": 7,
+      "requestHash": "e25f90f9a771502e73055e5d306b690e73685b0768258e5caa8db16f2a54118a",
+      "startedAt": "2026-07-28T09:02:11.524Z",
+      "finishedAt": "2026-07-28T09:02:13.836Z",
+      "latencyMs": 2311.657831000004,
+      "validity": "valid",
+      "category": "مجرة",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 454,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "ar:word-random",
+      "repetition": 7,
+      "requestHash": "e25f90f9a771502e73055e5d306b690e73685b0768258e5caa8db16f2a54118a",
+      "startedAt": "2026-07-28T09:02:11.525Z",
+      "finishedAt": "2026-07-28T09:02:13.560Z",
+      "latencyMs": 2034.9624249999906,
+      "validity": "valid",
+      "category": "مطر",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 67,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "ar:word-random",
+      "repetition": 8,
+      "requestHash": "f776b10e0db5e667fa02ed5a7e9a584c1b0ffbc32f80fb4b14769aed5572baf2",
+      "startedAt": "2026-07-28T09:02:13.837Z",
+      "finishedAt": "2026-07-28T09:02:15.781Z",
+      "latencyMs": 1943.7096010000096,
+      "validity": "valid",
+      "category": "غيمة",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 455,
+        "outputTokens": 6
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "ar:word-random",
+      "repetition": 8,
+      "requestHash": "f776b10e0db5e667fa02ed5a7e9a584c1b0ffbc32f80fb4b14769aed5572baf2",
+      "startedAt": "2026-07-28T09:02:13.836Z",
+      "finishedAt": "2026-07-28T09:02:15.947Z",
+      "latencyMs": 2110.2888620000012,
+      "validity": "valid",
+      "category": "سحابة",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 68,
+        "outputTokens": 7
+      }
+    },
+    {
+      "name": "9router",
+      "model": "cx/gpt-5.6-sol",
+      "cellId": "ar:word-random",
+      "repetition": 9,
+      "requestHash": "26217438283741a258efbf461b0047436b39228caa15bb23039ca4a6318675d3",
+      "startedAt": "2026-07-28T09:02:15.947Z",
+      "finishedAt": "2026-07-28T09:02:17.376Z",
+      "latencyMs": 1428.8635510000022,
+      "validity": "valid",
+      "category": "برتقالة",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 453,
+        "outputTokens": 7
+      }
+    },
+    {
+      "name": "AiCodeWith",
+      "model": "gpt-5.6-sol",
+      "cellId": "ar:word-random",
+      "repetition": 9,
+      "requestHash": "26217438283741a258efbf461b0047436b39228caa15bb23039ca4a6318675d3",
+      "startedAt": "2026-07-28T09:02:15.947Z",
+      "finishedAt": "2026-07-28T09:02:19.216Z",
+      "latencyMs": 3269.0906200000027,
+      "validity": "valid",
+      "category": "مطر",
+      "responseModel": "gpt-5.6-sol",
+      "reasoningDisabled": true,
+      "usage": {
+        "inputTokens": 66,
+        "outputTokens": 6
+      }
+    }
+  ],
+  "pairs": [
+    {
+      "cellId": "en:city-random",
+      "repetition": 0,
+      "requestHash": "2d330e4190aad101a211c1aa77aa89609a4975fcd06169403573e0f6b5a2e06b",
+      "referenceFirst": false,
+      "startGapMs": 26.81430499999999,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "en:city-random",
+        "repetition": 0,
+        "requestHash": "2d330e4190aad101a211c1aa77aa89609a4975fcd06169403573e0f6b5a2e06b",
+        "startedAt": "2026-07-28T09:00:15.948Z",
+        "finishedAt": "2026-07-28T09:00:18.997Z",
+        "latencyMs": 3048.986479,
+        "validity": "valid",
+        "category": "lisbon",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 450,
+          "outputTokens": 6
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "en:city-random",
+        "repetition": 0,
+        "requestHash": "2d330e4190aad101a211c1aa77aa89609a4975fcd06169403573e0f6b5a2e06b",
+        "startedAt": "2026-07-28T09:00:15.919Z",
+        "finishedAt": "2026-07-28T09:00:18.986Z",
+        "latencyMs": 3063.745335,
+        "validity": "valid",
+        "category": "marrakesh",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 63,
+          "outputTokens": 8
+        }
+      }
+    },
+    {
+      "cellId": "en:city-random",
+      "repetition": 1,
+      "requestHash": "c346aadb0321e3942e82071095a55253b90856197e26b12f36b7eb89d1014e2b",
+      "referenceFirst": false,
+      "startGapMs": 0.9688239999995858,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "en:city-random",
+        "repetition": 1,
+        "requestHash": "c346aadb0321e3942e82071095a55253b90856197e26b12f36b7eb89d1014e2b",
+        "startedAt": "2026-07-28T09:00:18.998Z",
+        "finishedAt": "2026-07-28T09:00:20.927Z",
+        "latencyMs": 1928.675565,
+        "validity": "valid",
+        "category": "lisbon",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 449,
+          "outputTokens": 6
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "en:city-random",
+        "repetition": 1,
+        "requestHash": "c346aadb0321e3942e82071095a55253b90856197e26b12f36b7eb89d1014e2b",
+        "startedAt": "2026-07-28T09:00:18.997Z",
+        "finishedAt": "2026-07-28T09:00:25.613Z",
+        "latencyMs": 6615.370690999999,
+        "validity": "valid",
+        "category": "valencia",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 62,
+          "outputTokens": 6
+        }
+      }
+    },
+    {
+      "cellId": "en:city-random",
+      "repetition": 2,
+      "requestHash": "4a6be02b2e628ec67ee9e79a3ddb23be6fafc8f37773a2b76668088d09b9ff8b",
+      "referenceFirst": true,
+      "startGapMs": 0.9659250000004249,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "en:city-random",
+        "repetition": 2,
+        "requestHash": "4a6be02b2e628ec67ee9e79a3ddb23be6fafc8f37773a2b76668088d09b9ff8b",
+        "startedAt": "2026-07-28T09:00:25.613Z",
+        "finishedAt": "2026-07-28T09:00:27.333Z",
+        "latencyMs": 1719.3439429999999,
+        "validity": "valid",
+        "category": "lisbon",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 449,
+          "outputTokens": 6
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "en:city-random",
+        "repetition": 2,
+        "requestHash": "4a6be02b2e628ec67ee9e79a3ddb23be6fafc8f37773a2b76668088d09b9ff8b",
+        "startedAt": "2026-07-28T09:00:25.614Z",
+        "finishedAt": "2026-07-28T09:00:28.092Z",
+        "latencyMs": 2477.272965,
+        "validity": "valid",
+        "category": "marrakesh",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 62,
+          "outputTokens": 8
+        }
+      }
+    },
+    {
+      "cellId": "en:city-random",
+      "repetition": 3,
+      "requestHash": "2af4abeebad6602f609963b49347b212700d1f580091346619dd7ee952db4507",
+      "referenceFirst": false,
+      "startGapMs": 0.6065839999992022,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "en:city-random",
+        "repetition": 3,
+        "requestHash": "2af4abeebad6602f609963b49347b212700d1f580091346619dd7ee952db4507",
+        "startedAt": "2026-07-28T09:00:28.092Z",
+        "finishedAt": "2026-07-28T09:00:31.348Z",
+        "latencyMs": 3255.7002319999992,
+        "validity": "valid",
+        "category": "lisbon",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 447,
+          "outputTokens": 6
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "en:city-random",
+        "repetition": 3,
+        "requestHash": "2af4abeebad6602f609963b49347b212700d1f580091346619dd7ee952db4507",
+        "startedAt": "2026-07-28T09:00:28.092Z",
+        "finishedAt": "2026-07-28T09:00:30.512Z",
+        "latencyMs": 2419.9592059999995,
+        "validity": "valid",
+        "category": "melbourne",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 60,
+          "outputTokens": 6
+        }
+      }
+    },
+    {
+      "cellId": "en:city-random",
+      "repetition": 4,
+      "requestHash": "4b72515f3827c9706c0bb247e76b77fce2ccd227afef963468f719debbc54c7d",
+      "referenceFirst": false,
+      "startGapMs": 1.540222999999969,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "en:city-random",
+        "repetition": 4,
+        "requestHash": "4b72515f3827c9706c0bb247e76b77fce2ccd227afef963468f719debbc54c7d",
+        "startedAt": "2026-07-28T09:00:31.350Z",
+        "finishedAt": "2026-07-28T09:00:34.878Z",
+        "latencyMs": 3528.110236999999,
+        "validity": "valid",
+        "category": "lisbon",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 449,
+          "outputTokens": 6
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "en:city-random",
+        "repetition": 4,
+        "requestHash": "4b72515f3827c9706c0bb247e76b77fce2ccd227afef963468f719debbc54c7d",
+        "startedAt": "2026-07-28T09:00:31.348Z",
+        "finishedAt": "2026-07-28T09:00:33.236Z",
+        "latencyMs": 1887.1852469999994,
+        "validity": "valid",
+        "category": "marrakesh",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 62,
+          "outputTokens": 8
+        }
+      }
+    },
+    {
+      "cellId": "en:city-random",
+      "repetition": 5,
+      "requestHash": "a9351c1c8773b2b3f330eda4fc0233045b59f7fb618ecda7179c9a774d707dbc",
+      "referenceFirst": true,
+      "startGapMs": 0.5169519999981276,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "en:city-random",
+        "repetition": 5,
+        "requestHash": "a9351c1c8773b2b3f330eda4fc0233045b59f7fb618ecda7179c9a774d707dbc",
+        "startedAt": "2026-07-28T09:00:34.878Z",
+        "finishedAt": "2026-07-28T09:00:36.993Z",
+        "latencyMs": 2114.9089050000002,
+        "validity": "valid",
+        "category": "lisbon",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 448,
+          "outputTokens": 6
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "en:city-random",
+        "repetition": 5,
+        "requestHash": "a9351c1c8773b2b3f330eda4fc0233045b59f7fb618ecda7179c9a774d707dbc",
+        "startedAt": "2026-07-28T09:00:34.879Z",
+        "finishedAt": "2026-07-28T09:00:36.878Z",
+        "latencyMs": 1998.843886999999,
+        "validity": "valid",
+        "category": "kyoto",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 61,
+          "outputTokens": 6
+        }
+      }
+    },
+    {
+      "cellId": "en:city-random",
+      "repetition": 6,
+      "requestHash": "524e79f543ad73ade53c60e885c55f4b572373790bf098d9c5aaed7425eb3eb1",
+      "referenceFirst": false,
+      "startGapMs": 0.430967000000237,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "en:city-random",
+        "repetition": 6,
+        "requestHash": "524e79f543ad73ade53c60e885c55f4b572373790bf098d9c5aaed7425eb3eb1",
+        "startedAt": "2026-07-28T09:00:36.994Z",
+        "finishedAt": "2026-07-28T09:00:38.827Z",
+        "latencyMs": 1832.366688000002,
+        "validity": "valid",
+        "category": "lisbon",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 447,
+          "outputTokens": 6
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "en:city-random",
+        "repetition": 6,
+        "requestHash": "524e79f543ad73ade53c60e885c55f4b572373790bf098d9c5aaed7425eb3eb1",
+        "startedAt": "2026-07-28T09:00:36.994Z",
+        "finishedAt": "2026-07-28T09:00:40.748Z",
+        "latencyMs": 3753.7334319999973,
+        "validity": "valid",
+        "category": "oslo",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 60,
+          "outputTokens": 6
+        }
+      }
+    },
+    {
+      "cellId": "en:city-random",
+      "repetition": 7,
+      "requestHash": "c534ecdb7ea73058567eb71d5d056d1cda8f0c24e80a15eab52721c63bc5cd33",
+      "referenceFirst": true,
+      "startGapMs": 0.3775339999992866,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "en:city-random",
+        "repetition": 7,
+        "requestHash": "c534ecdb7ea73058567eb71d5d056d1cda8f0c24e80a15eab52721c63bc5cd33",
+        "startedAt": "2026-07-28T09:00:40.748Z",
+        "finishedAt": "2026-07-28T09:00:46.355Z",
+        "latencyMs": 5606.771078999998,
+        "validity": "valid",
+        "category": "lisbon",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 446,
+          "outputTokens": 6
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "en:city-random",
+        "repetition": 7,
+        "requestHash": "c534ecdb7ea73058567eb71d5d056d1cda8f0c24e80a15eab52721c63bc5cd33",
+        "startedAt": "2026-07-28T09:00:40.748Z",
+        "finishedAt": "2026-07-28T09:00:43.506Z",
+        "latencyMs": 2757.4456809999974,
+        "validity": "valid",
+        "category": "lisbon",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 59,
+          "outputTokens": 6
+        }
+      }
+    },
+    {
+      "cellId": "en:city-random",
+      "repetition": 8,
+      "requestHash": "ad4af96019c6ffc889f4c4f78bd6bd38d477b667cc977ec5b966cb31dd1e9cdd",
+      "referenceFirst": false,
+      "startGapMs": 0.4162900000010268,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "en:city-random",
+        "repetition": 8,
+        "requestHash": "ad4af96019c6ffc889f4c4f78bd6bd38d477b667cc977ec5b966cb31dd1e9cdd",
+        "startedAt": "2026-07-28T09:00:46.355Z",
+        "finishedAt": "2026-07-28T09:00:48.061Z",
+        "latencyMs": 1705.488773000001,
+        "validity": "valid",
+        "category": "lisbon",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 447,
+          "outputTokens": 6
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "en:city-random",
+        "repetition": 8,
+        "requestHash": "ad4af96019c6ffc889f4c4f78bd6bd38d477b667cc977ec5b966cb31dd1e9cdd",
+        "startedAt": "2026-07-28T09:00:46.355Z",
+        "finishedAt": "2026-07-28T09:00:47.946Z",
+        "latencyMs": 1591.5863250000002,
+        "validity": "valid",
+        "category": "lisbon",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 60,
+          "outputTokens": 6
+        }
+      }
+    },
+    {
+      "cellId": "en:city-random",
+      "repetition": 9,
+      "requestHash": "494d8bae2248018d9a63e204dd014ccc6e72cdf7e715f2b6f5830fa5cf37929f",
+      "referenceFirst": true,
+      "startGapMs": 0.4682500000017171,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "en:city-random",
+        "repetition": 9,
+        "requestHash": "494d8bae2248018d9a63e204dd014ccc6e72cdf7e715f2b6f5830fa5cf37929f",
+        "startedAt": "2026-07-28T09:00:48.061Z",
+        "finishedAt": "2026-07-28T09:00:51.025Z",
+        "latencyMs": 2963.636112,
+        "validity": "valid",
+        "category": "valencia",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 448,
+          "outputTokens": 6
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "en:city-random",
+        "repetition": 9,
+        "requestHash": "494d8bae2248018d9a63e204dd014ccc6e72cdf7e715f2b6f5830fa5cf37929f",
+        "startedAt": "2026-07-28T09:00:48.061Z",
+        "finishedAt": "2026-07-28T09:00:50.383Z",
+        "latencyMs": 2321.543178,
+        "validity": "valid",
+        "category": "kyoto",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 61,
+          "outputTokens": 6
+        }
+      }
+    },
+    {
+      "cellId": "ru:animal-random",
+      "repetition": 0,
+      "requestHash": "0ec972d69be90b96f563c655fa9c6d9c2b998e07a4487e12c9b92dff513d615e",
+      "referenceFirst": true,
+      "startGapMs": 0.4636400000017602,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "ru:animal-random",
+        "repetition": 0,
+        "requestHash": "0ec972d69be90b96f563c655fa9c6d9c2b998e07a4487e12c9b92dff513d615e",
+        "startedAt": "2026-07-28T09:00:51.025Z",
+        "finishedAt": "2026-07-28T09:00:52.292Z",
+        "latencyMs": 1266.141343000003,
+        "validity": "valid",
+        "category": "капибара",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 459,
+          "outputTokens": 8
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "ru:animal-random",
+        "repetition": 0,
+        "requestHash": "0ec972d69be90b96f563c655fa9c6d9c2b998e07a4487e12c9b92dff513d615e",
+        "startedAt": "2026-07-28T09:00:51.025Z",
+        "finishedAt": "2026-07-28T09:00:52.831Z",
+        "latencyMs": 1805.7779609999998,
+        "validity": "valid",
+        "category": "капибара",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 72,
+          "outputTokens": 8
+        }
+      }
+    },
+    {
+      "cellId": "ru:animal-random",
+      "repetition": 1,
+      "requestHash": "14a7905ae9639f94815796cd682493af28c21cd4b5cf778f2fce07fa6f74e0ca",
+      "referenceFirst": false,
+      "startGapMs": 0.3890140000003157,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "ru:animal-random",
+        "repetition": 1,
+        "requestHash": "14a7905ae9639f94815796cd682493af28c21cd4b5cf778f2fce07fa6f74e0ca",
+        "startedAt": "2026-07-28T09:00:52.832Z",
+        "finishedAt": "2026-07-28T09:00:54.438Z",
+        "latencyMs": 1606.3796350000048,
+        "validity": "valid",
+        "category": "капибара",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 458,
+          "outputTokens": 8
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "ru:animal-random",
+        "repetition": 1,
+        "requestHash": "14a7905ae9639f94815796cd682493af28c21cd4b5cf778f2fce07fa6f74e0ca",
+        "startedAt": "2026-07-28T09:00:52.831Z",
+        "finishedAt": "2026-07-28T09:00:54.531Z",
+        "latencyMs": 1699.4390490000005,
+        "validity": "valid",
+        "category": "капибара",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 71,
+          "outputTokens": 8
+        }
+      }
+    },
+    {
+      "cellId": "ru:animal-random",
+      "repetition": 2,
+      "requestHash": "54044ef49160bdb78e90ad8244b9a2be02d30347640b7ee436a8e2f6052b6335",
+      "referenceFirst": true,
+      "startGapMs": 0.5323309999948833,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "ru:animal-random",
+        "repetition": 2,
+        "requestHash": "54044ef49160bdb78e90ad8244b9a2be02d30347640b7ee436a8e2f6052b6335",
+        "startedAt": "2026-07-28T09:00:54.531Z",
+        "finishedAt": "2026-07-28T09:00:56.185Z",
+        "latencyMs": 1653.8138410000029,
+        "validity": "valid",
+        "category": "капибара",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 461,
+          "outputTokens": 8
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "ru:animal-random",
+        "repetition": 2,
+        "requestHash": "54044ef49160bdb78e90ad8244b9a2be02d30347640b7ee436a8e2f6052b6335",
+        "startedAt": "2026-07-28T09:00:54.532Z",
+        "finishedAt": "2026-07-28T09:00:57.461Z",
+        "latencyMs": 2929.535981999994,
+        "validity": "valid",
+        "category": "капибара",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 74,
+          "outputTokens": 8
+        }
+      }
+    },
+    {
+      "cellId": "ru:animal-random",
+      "repetition": 3,
+      "requestHash": "a78d6f54888fc61bb3506bf9df772c77b9be6efa664c5bddef9c0e39825f0210",
+      "referenceFirst": false,
+      "startGapMs": 0.3868849999998929,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "ru:animal-random",
+        "repetition": 3,
+        "requestHash": "a78d6f54888fc61bb3506bf9df772c77b9be6efa664c5bddef9c0e39825f0210",
+        "startedAt": "2026-07-28T09:00:57.462Z",
+        "finishedAt": "2026-07-28T09:01:00.997Z",
+        "latencyMs": 3534.5347399999955,
+        "validity": "valid",
+        "category": "капибара",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 458,
+          "outputTokens": 8
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "ru:animal-random",
+        "repetition": 3,
+        "requestHash": "a78d6f54888fc61bb3506bf9df772c77b9be6efa664c5bddef9c0e39825f0210",
+        "startedAt": "2026-07-28T09:00:57.462Z",
+        "finishedAt": "2026-07-28T09:01:00.455Z",
+        "latencyMs": 2993.212535000006,
+        "validity": "valid",
+        "category": "капибара",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 71,
+          "outputTokens": 8
+        }
+      }
+    },
+    {
+      "cellId": "ru:animal-random",
+      "repetition": 4,
+      "requestHash": "9254512139fc93cf9f5a8b1706c53aef18d2901503db5fd6bfac08078a3478c5",
+      "referenceFirst": true,
+      "startGapMs": 0.5805210000035004,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "ru:animal-random",
+        "repetition": 4,
+        "requestHash": "9254512139fc93cf9f5a8b1706c53aef18d2901503db5fd6bfac08078a3478c5",
+        "startedAt": "2026-07-28T09:01:00.997Z",
+        "finishedAt": "2026-07-28T09:01:04.011Z",
+        "latencyMs": 3013.5962040000013,
+        "validity": "valid",
+        "category": "капибара",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 458,
+          "outputTokens": 8
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "ru:animal-random",
+        "repetition": 4,
+        "requestHash": "9254512139fc93cf9f5a8b1706c53aef18d2901503db5fd6bfac08078a3478c5",
+        "startedAt": "2026-07-28T09:01:00.997Z",
+        "finishedAt": "2026-07-28T09:01:07.559Z",
+        "latencyMs": 6561.087812000005,
+        "validity": "valid",
+        "category": "капибара",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 71,
+          "outputTokens": 8
+        }
+      }
+    },
+    {
+      "cellId": "ru:animal-random",
+      "repetition": 5,
+      "requestHash": "63ec8e2470fd347ab6176e0edded3a9a85bfe46d0d93012750bc68be6d72f7ef",
+      "referenceFirst": false,
+      "startGapMs": 0.5792419999997946,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "ru:animal-random",
+        "repetition": 5,
+        "requestHash": "63ec8e2470fd347ab6176e0edded3a9a85bfe46d0d93012750bc68be6d72f7ef",
+        "startedAt": "2026-07-28T09:01:07.559Z",
+        "finishedAt": "2026-07-28T09:01:11.411Z",
+        "latencyMs": 3851.027277000001,
+        "validity": "valid",
+        "category": "капибара",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 460,
+          "outputTokens": 8
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "ru:animal-random",
+        "repetition": 5,
+        "requestHash": "63ec8e2470fd347ab6176e0edded3a9a85bfe46d0d93012750bc68be6d72f7ef",
+        "startedAt": "2026-07-28T09:01:07.559Z",
+        "finishedAt": "2026-07-28T09:01:09.926Z",
+        "latencyMs": 2366.758740999998,
+        "validity": "valid",
+        "category": "капибара",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 73,
+          "outputTokens": 8
+        }
+      }
+    },
+    {
+      "cellId": "ru:animal-random",
+      "repetition": 6,
+      "requestHash": "ed63bce9e9772e75f1d35b59e03ec16b232d7c52a9e7a97b54cd7d3e5bb86f96",
+      "referenceFirst": true,
+      "startGapMs": 0.46166700000321725,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "ru:animal-random",
+        "repetition": 6,
+        "requestHash": "ed63bce9e9772e75f1d35b59e03ec16b232d7c52a9e7a97b54cd7d3e5bb86f96",
+        "startedAt": "2026-07-28T09:01:11.411Z",
+        "finishedAt": "2026-07-28T09:01:13.052Z",
+        "latencyMs": 1640.6976819999982,
+        "validity": "valid",
+        "category": "капибара",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 460,
+          "outputTokens": 8
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "ru:animal-random",
+        "repetition": 6,
+        "requestHash": "ed63bce9e9772e75f1d35b59e03ec16b232d7c52a9e7a97b54cd7d3e5bb86f96",
+        "startedAt": "2026-07-28T09:01:11.411Z",
+        "finishedAt": "2026-07-28T09:01:15.032Z",
+        "latencyMs": 3620.422799,
+        "validity": "valid",
+        "category": "капибара",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 73,
+          "outputTokens": 8
+        }
+      }
+    },
+    {
+      "cellId": "ru:animal-random",
+      "repetition": 7,
+      "requestHash": "e09791a462ba995439af3ba994f76233a53105d98a7bbc31064f321cc518aa07",
+      "referenceFirst": false,
+      "startGapMs": 0.45156300000235206,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "ru:animal-random",
+        "repetition": 7,
+        "requestHash": "e09791a462ba995439af3ba994f76233a53105d98a7bbc31064f321cc518aa07",
+        "startedAt": "2026-07-28T09:01:15.032Z",
+        "finishedAt": "2026-07-28T09:01:16.580Z",
+        "latencyMs": 1547.7844809999951,
+        "validity": "valid",
+        "category": "капибара",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 460,
+          "outputTokens": 8
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "ru:animal-random",
+        "repetition": 7,
+        "requestHash": "e09791a462ba995439af3ba994f76233a53105d98a7bbc31064f321cc518aa07",
+        "startedAt": "2026-07-28T09:01:15.032Z",
+        "finishedAt": "2026-07-28T09:01:17.438Z",
+        "latencyMs": 2405.763444999997,
+        "validity": "valid",
+        "category": "капибара",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 73,
+          "outputTokens": 8
+        }
+      }
+    },
+    {
+      "cellId": "ru:animal-random",
+      "repetition": 8,
+      "requestHash": "5a1d8e580a6227245a663cab89160293c84be920e1fd085ff5e560b7f8dd4b91",
+      "referenceFirst": false,
+      "startGapMs": 0.43090099999972153,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "ru:animal-random",
+        "repetition": 8,
+        "requestHash": "5a1d8e580a6227245a663cab89160293c84be920e1fd085ff5e560b7f8dd4b91",
+        "startedAt": "2026-07-28T09:01:17.438Z",
+        "finishedAt": "2026-07-28T09:01:18.634Z",
+        "latencyMs": 1195.5022099999987,
+        "validity": "valid",
+        "category": "капибара",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 461,
+          "outputTokens": 8
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "ru:animal-random",
+        "repetition": 8,
+        "requestHash": "5a1d8e580a6227245a663cab89160293c84be920e1fd085ff5e560b7f8dd4b91",
+        "startedAt": "2026-07-28T09:01:17.438Z",
+        "finishedAt": "2026-07-28T09:01:19.572Z",
+        "latencyMs": 2133.729892999996,
+        "validity": "valid",
+        "category": "капибара",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 74,
+          "outputTokens": 8
+        }
+      }
+    },
+    {
+      "cellId": "ru:animal-random",
+      "repetition": 9,
+      "requestHash": "0d677571b3d521b4396a4ecf1ef9186d906d8d4c766835f65e3d0900f735feae",
+      "referenceFirst": false,
+      "startGapMs": 0.40227600000071106,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "ru:animal-random",
+        "repetition": 9,
+        "requestHash": "0d677571b3d521b4396a4ecf1ef9186d906d8d4c766835f65e3d0900f735feae",
+        "startedAt": "2026-07-28T09:01:19.572Z",
+        "finishedAt": "2026-07-28T09:01:20.921Z",
+        "latencyMs": 1348.9585129999978,
+        "validity": "valid",
+        "category": "капибара",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 459,
+          "outputTokens": 8
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "ru:animal-random",
+        "repetition": 9,
+        "requestHash": "0d677571b3d521b4396a4ecf1ef9186d906d8d4c766835f65e3d0900f735feae",
+        "startedAt": "2026-07-28T09:01:19.572Z",
+        "finishedAt": "2026-07-28T09:01:24.472Z",
+        "latencyMs": 4899.817719000006,
+        "validity": "valid",
+        "category": "капибара",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 72,
+          "outputTokens": 8
+        }
+      }
+    },
+    {
+      "cellId": "zh:word-random",
+      "repetition": 0,
+      "requestHash": "07fbdb84fa455113d35435b88862e23d2ff633bd3450d34a22f3eeaa6f454ee0",
+      "referenceFirst": false,
+      "startGapMs": 0.5138370000058785,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "zh:word-random",
+        "repetition": 0,
+        "requestHash": "07fbdb84fa455113d35435b88862e23d2ff633bd3450d34a22f3eeaa6f454ee0",
+        "startedAt": "2026-07-28T09:01:24.472Z",
+        "finishedAt": "2026-07-28T09:01:25.680Z",
+        "latencyMs": 1206.9296540000068,
+        "validity": "valid",
+        "category": "星河",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 454,
+          "outputTokens": 6
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "zh:word-random",
+        "repetition": 0,
+        "requestHash": "07fbdb84fa455113d35435b88862e23d2ff633bd3450d34a22f3eeaa6f454ee0",
+        "startedAt": "2026-07-28T09:01:24.472Z",
+        "finishedAt": "2026-07-28T09:01:29.516Z",
+        "latencyMs": 5044.219798999999,
+        "validity": "valid",
+        "category": "星辰",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 67,
+          "outputTokens": 6
+        }
+      }
+    },
+    {
+      "cellId": "zh:word-random",
+      "repetition": 1,
+      "requestHash": "f9e103b69b61d15bfea1316e223934878f74a59d2400226dffa1cd83f171fa29",
+      "referenceFirst": false,
+      "startGapMs": 0.35762399999657646,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "zh:word-random",
+        "repetition": 1,
+        "requestHash": "f9e103b69b61d15bfea1316e223934878f74a59d2400226dffa1cd83f171fa29",
+        "startedAt": "2026-07-28T09:01:29.517Z",
+        "finishedAt": "2026-07-28T09:01:31.027Z",
+        "latencyMs": 1509.9231599999912,
+        "validity": "valid",
+        "category": "星辰",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 452,
+          "outputTokens": 6
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "zh:word-random",
+        "repetition": 1,
+        "requestHash": "f9e103b69b61d15bfea1316e223934878f74a59d2400226dffa1cd83f171fa29",
+        "startedAt": "2026-07-28T09:01:29.516Z",
+        "finishedAt": "2026-07-28T09:01:31.391Z",
+        "latencyMs": 1874.8181369999947,
+        "validity": "valid",
+        "category": "星河",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 65,
+          "outputTokens": 6
+        }
+      }
+    },
+    {
+      "cellId": "zh:word-random",
+      "repetition": 2,
+      "requestHash": "702373217908139d44154389007bfcfc91da0c122b3880e6d33ed453a8d68c84",
+      "referenceFirst": false,
+      "startGapMs": 0.3806710000062594,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "zh:word-random",
+        "repetition": 2,
+        "requestHash": "702373217908139d44154389007bfcfc91da0c122b3880e6d33ed453a8d68c84",
+        "startedAt": "2026-07-28T09:01:31.392Z",
+        "finishedAt": "2026-07-28T09:01:32.879Z",
+        "latencyMs": 1486.579911000008,
+        "validity": "valid",
+        "category": "星辰",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 450,
+          "outputTokens": 6
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "zh:word-random",
+        "repetition": 2,
+        "requestHash": "702373217908139d44154389007bfcfc91da0c122b3880e6d33ed453a8d68c84",
+        "startedAt": "2026-07-28T09:01:31.391Z",
+        "finishedAt": "2026-07-28T09:01:33.439Z",
+        "latencyMs": 2047.394827000011,
+        "validity": "valid",
+        "category": "星河",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 63,
+          "outputTokens": 6
+        }
+      }
+    },
+    {
+      "cellId": "zh:word-random",
+      "repetition": 3,
+      "requestHash": "64b1c30aa034e7379110fc468dfadd68a5992ec0292bd7a78e62831c91dc5cc8",
+      "referenceFirst": true,
+      "startGapMs": 0.3926060000085272,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "zh:word-random",
+        "repetition": 3,
+        "requestHash": "64b1c30aa034e7379110fc468dfadd68a5992ec0292bd7a78e62831c91dc5cc8",
+        "startedAt": "2026-07-28T09:01:33.439Z",
+        "finishedAt": "2026-07-28T09:01:36.670Z",
+        "latencyMs": 3231.114102000007,
+        "validity": "valid",
+        "category": "星辰",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 455,
+          "outputTokens": 6
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "zh:word-random",
+        "repetition": 3,
+        "requestHash": "64b1c30aa034e7379110fc468dfadd68a5992ec0292bd7a78e62831c91dc5cc8",
+        "startedAt": "2026-07-28T09:01:33.440Z",
+        "finishedAt": "2026-07-28T09:01:35.158Z",
+        "latencyMs": 1717.867769999997,
+        "validity": "valid",
+        "category": "星云",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 68,
+          "outputTokens": 6
+        }
+      }
+    },
+    {
+      "cellId": "zh:word-random",
+      "repetition": 4,
+      "requestHash": "f84ea0502a2d6ba55ddcd4b693f313eef7d7af5b33ccffd29bc6de28be43890a",
+      "referenceFirst": false,
+      "startGapMs": 0.39941700000781566,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "zh:word-random",
+        "repetition": 4,
+        "requestHash": "f84ea0502a2d6ba55ddcd4b693f313eef7d7af5b33ccffd29bc6de28be43890a",
+        "startedAt": "2026-07-28T09:01:36.671Z",
+        "finishedAt": "2026-07-28T09:01:38.357Z",
+        "latencyMs": 1686.1901809999981,
+        "validity": "valid",
+        "category": "海洋",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 452,
+          "outputTokens": 6
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "zh:word-random",
+        "repetition": 4,
+        "requestHash": "f84ea0502a2d6ba55ddcd4b693f313eef7d7af5b33ccffd29bc6de28be43890a",
+        "startedAt": "2026-07-28T09:01:36.671Z",
+        "finishedAt": "2026-07-28T09:01:38.212Z",
+        "latencyMs": 1540.8958739999944,
+        "validity": "valid",
+        "category": "星河",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 65,
+          "outputTokens": 6
+        }
+      }
+    },
+    {
+      "cellId": "zh:word-random",
+      "repetition": 5,
+      "requestHash": "28ceffc801485788d58310d6e2081a277ac961d55df24489baa92170aa5cd46c",
+      "referenceFirst": false,
+      "startGapMs": 0.40634299999510404,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "zh:word-random",
+        "repetition": 5,
+        "requestHash": "28ceffc801485788d58310d6e2081a277ac961d55df24489baa92170aa5cd46c",
+        "startedAt": "2026-07-28T09:01:38.358Z",
+        "finishedAt": "2026-07-28T09:01:40.023Z",
+        "latencyMs": 1665.3181089999998,
+        "validity": "valid",
+        "category": "流星",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 453,
+          "outputTokens": 6
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "zh:word-random",
+        "repetition": 5,
+        "requestHash": "28ceffc801485788d58310d6e2081a277ac961d55df24489baa92170aa5cd46c",
+        "startedAt": "2026-07-28T09:01:38.357Z",
+        "finishedAt": "2026-07-28T09:01:39.698Z",
+        "latencyMs": 1340.012447999994,
+        "validity": "valid",
+        "category": "星尘",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 66,
+          "outputTokens": 7
+        }
+      }
+    },
+    {
+      "cellId": "zh:word-random",
+      "repetition": 6,
+      "requestHash": "eb371d25137aed96575aa0dfaa5c1891c4fb045cf9043e97d32d9b2858ccf5d2",
+      "referenceFirst": false,
+      "startGapMs": 0.4253480000043055,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "zh:word-random",
+        "repetition": 6,
+        "requestHash": "eb371d25137aed96575aa0dfaa5c1891c4fb045cf9043e97d32d9b2858ccf5d2",
+        "startedAt": "2026-07-28T09:01:40.024Z",
+        "finishedAt": "2026-07-28T09:01:41.258Z",
+        "latencyMs": 1233.7635119999904,
+        "validity": "valid",
+        "category": "星河",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 453,
+          "outputTokens": 6
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "zh:word-random",
+        "repetition": 6,
+        "requestHash": "eb371d25137aed96575aa0dfaa5c1891c4fb045cf9043e97d32d9b2858ccf5d2",
+        "startedAt": "2026-07-28T09:01:40.023Z",
+        "finishedAt": "2026-07-28T09:01:42.426Z",
+        "latencyMs": 2401.9677740000043,
+        "validity": "valid",
+        "category": "星辰",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 66,
+          "outputTokens": 6
+        }
+      }
+    },
+    {
+      "cellId": "zh:word-random",
+      "repetition": 7,
+      "requestHash": "3245825f2d2b512da7ef2d7e144dfc789f4a8030260104121acaf290cfe85327",
+      "referenceFirst": true,
+      "startGapMs": 0.3755889999883948,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "zh:word-random",
+        "repetition": 7,
+        "requestHash": "3245825f2d2b512da7ef2d7e144dfc789f4a8030260104121acaf290cfe85327",
+        "startedAt": "2026-07-28T09:01:42.426Z",
+        "finishedAt": "2026-07-28T09:01:44.998Z",
+        "latencyMs": 2571.7675889999955,
+        "validity": "valid",
+        "category": "琥珀",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 453,
+          "outputTokens": 8
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "zh:word-random",
+        "repetition": 7,
+        "requestHash": "3245825f2d2b512da7ef2d7e144dfc789f4a8030260104121acaf290cfe85327",
+        "startedAt": "2026-07-28T09:01:42.426Z",
+        "finishedAt": "2026-07-28T09:01:44.470Z",
+        "latencyMs": 2043.5787750000018,
+        "validity": "valid",
+        "category": "星云",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 66,
+          "outputTokens": 6
+        }
+      }
+    },
+    {
+      "cellId": "zh:word-random",
+      "repetition": 8,
+      "requestHash": "4c12860f1ad28028595c1b8135ad3c51d3290f1a237e76c85b797e57610d6b82",
+      "referenceFirst": true,
+      "startGapMs": 0.4117439999972703,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "zh:word-random",
+        "repetition": 8,
+        "requestHash": "4c12860f1ad28028595c1b8135ad3c51d3290f1a237e76c85b797e57610d6b82",
+        "startedAt": "2026-07-28T09:01:44.998Z",
+        "finishedAt": "2026-07-28T09:01:47.026Z",
+        "latencyMs": 2028.1780049999943,
+        "validity": "valid",
+        "category": "星河",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 451,
+          "outputTokens": 6
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "zh:word-random",
+        "repetition": 8,
+        "requestHash": "4c12860f1ad28028595c1b8135ad3c51d3290f1a237e76c85b797e57610d6b82",
+        "startedAt": "2026-07-28T09:01:44.998Z",
+        "finishedAt": "2026-07-28T09:01:47.232Z",
+        "latencyMs": 2233.752185999998,
+        "validity": "valid",
+        "category": "星云",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 64,
+          "outputTokens": 6
+        }
+      }
+    },
+    {
+      "cellId": "zh:word-random",
+      "repetition": 9,
+      "requestHash": "14247e55c4ecc52f2e691cfe2a3c831b30c836f89424daefb588d744adbd41e1",
+      "referenceFirst": true,
+      "startGapMs": 0.3743569999933243,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "zh:word-random",
+        "repetition": 9,
+        "requestHash": "14247e55c4ecc52f2e691cfe2a3c831b30c836f89424daefb588d744adbd41e1",
+        "startedAt": "2026-07-28T09:01:47.232Z",
+        "finishedAt": "2026-07-28T09:01:48.777Z",
+        "latencyMs": 1545.1470739999932,
+        "validity": "valid",
+        "category": "星河",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 454,
+          "outputTokens": 6
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "zh:word-random",
+        "repetition": 9,
+        "requestHash": "14247e55c4ecc52f2e691cfe2a3c831b30c836f89424daefb588d744adbd41e1",
+        "startedAt": "2026-07-28T09:01:47.232Z",
+        "finishedAt": "2026-07-28T09:01:51.645Z",
+        "latencyMs": 4412.252281000008,
+        "validity": "valid",
+        "category": "星河",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 67,
+          "outputTokens": 6
+        }
+      }
+    },
+    {
+      "cellId": "ar:word-random",
+      "repetition": 0,
+      "requestHash": "c59535ac09d26509b71646a9a46d5e94e92338bdcdb720af3e5f87d2cdae39d8",
+      "referenceFirst": false,
+      "startGapMs": 0.5536200000060489,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "ar:word-random",
+        "repetition": 0,
+        "requestHash": "c59535ac09d26509b71646a9a46d5e94e92338bdcdb720af3e5f87d2cdae39d8",
+        "startedAt": "2026-07-28T09:01:51.646Z",
+        "finishedAt": "2026-07-28T09:01:54.355Z",
+        "latencyMs": 2708.751071000006,
+        "validity": "valid",
+        "category": "برتقالة",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 451,
+          "outputTokens": 7
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "ar:word-random",
+        "repetition": 0,
+        "requestHash": "c59535ac09d26509b71646a9a46d5e94e92338bdcdb720af3e5f87d2cdae39d8",
+        "startedAt": "2026-07-28T09:01:51.645Z",
+        "finishedAt": "2026-07-28T09:01:53.985Z",
+        "latencyMs": 2339.7771680000005,
+        "validity": "valid",
+        "category": "تفاحة",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 64,
+          "outputTokens": 6
+        }
+      }
+    },
+    {
+      "cellId": "ar:word-random",
+      "repetition": 1,
+      "requestHash": "776a0f359d8317019d6392699398678e4560f46f69e044717bc4b1e87b439707",
+      "referenceFirst": true,
+      "startGapMs": 0.4340740000043297,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "ar:word-random",
+        "repetition": 1,
+        "requestHash": "776a0f359d8317019d6392699398678e4560f46f69e044717bc4b1e87b439707",
+        "startedAt": "2026-07-28T09:01:54.355Z",
+        "finishedAt": "2026-07-28T09:01:55.908Z",
+        "latencyMs": 1553.5021209999977,
+        "validity": "valid",
+        "category": "موزة",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 455,
+          "outputTokens": 7
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "ar:word-random",
+        "repetition": 1,
+        "requestHash": "776a0f359d8317019d6392699398678e4560f46f69e044717bc4b1e87b439707",
+        "startedAt": "2026-07-28T09:01:54.355Z",
+        "finishedAt": "2026-07-28T09:01:58.515Z",
+        "latencyMs": 4160.226383999994,
+        "validity": "valid",
+        "category": "غيمة",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 68,
+          "outputTokens": 6
+        }
+      }
+    },
+    {
+      "cellId": "ar:word-random",
+      "repetition": 2,
+      "requestHash": "dacaeeee0f71dbc8a23b07757ada28b3ac9b4d699793706388c619c250760990",
+      "referenceFirst": false,
+      "startGapMs": 0.3569640000059735,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "ar:word-random",
+        "repetition": 2,
+        "requestHash": "dacaeeee0f71dbc8a23b07757ada28b3ac9b4d699793706388c619c250760990",
+        "startedAt": "2026-07-28T09:01:58.516Z",
+        "finishedAt": "2026-07-28T09:02:00.106Z",
+        "latencyMs": 1589.6927320000104,
+        "validity": "valid",
+        "category": "مطر",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 453,
+          "outputTokens": 6
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "ar:word-random",
+        "repetition": 2,
+        "requestHash": "dacaeeee0f71dbc8a23b07757ada28b3ac9b4d699793706388c619c250760990",
+        "startedAt": "2026-07-28T09:01:58.516Z",
+        "finishedAt": "2026-07-28T09:02:00.181Z",
+        "latencyMs": 1665.702038000003,
+        "validity": "valid",
+        "category": "مجرة",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 66,
+          "outputTokens": 6
+        }
+      }
+    },
+    {
+      "cellId": "ar:word-random",
+      "repetition": 3,
+      "requestHash": "f98f344f3f0c6778ad292f08bd9213088fa4f11bc65441d22353adfd6bcac4cc",
+      "referenceFirst": true,
+      "startGapMs": 0.3792959999991581,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "ar:word-random",
+        "repetition": 3,
+        "requestHash": "f98f344f3f0c6778ad292f08bd9213088fa4f11bc65441d22353adfd6bcac4cc",
+        "startedAt": "2026-07-28T09:02:00.182Z",
+        "finishedAt": "2026-07-28T09:02:01.627Z",
+        "latencyMs": 1444.902120999992,
+        "validity": "valid",
+        "category": "برتقالة",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 452,
+          "outputTokens": 7
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "ar:word-random",
+        "repetition": 3,
+        "requestHash": "f98f344f3f0c6778ad292f08bd9213088fa4f11bc65441d22353adfd6bcac4cc",
+        "startedAt": "2026-07-28T09:02:00.182Z",
+        "finishedAt": "2026-07-28T09:02:02.059Z",
+        "latencyMs": 1876.9156280000025,
+        "validity": "valid",
+        "category": "مجرة",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 65,
+          "outputTokens": 6
+        }
+      }
+    },
+    {
+      "cellId": "ar:word-random",
+      "repetition": 4,
+      "requestHash": "d48bae60c41c5b88fe5e84b3ce84dbd66742382ab083d99547c7d1e7597e6a0a",
+      "referenceFirst": false,
+      "startGapMs": 0.4417459999967832,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "ar:word-random",
+        "repetition": 4,
+        "requestHash": "d48bae60c41c5b88fe5e84b3ce84dbd66742382ab083d99547c7d1e7597e6a0a",
+        "startedAt": "2026-07-28T09:02:02.059Z",
+        "finishedAt": "2026-07-28T09:02:06.872Z",
+        "latencyMs": 4812.085765000011,
+        "validity": "valid",
+        "category": "مطر",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 454,
+          "outputTokens": 6
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "ar:word-random",
+        "repetition": 4,
+        "requestHash": "d48bae60c41c5b88fe5e84b3ce84dbd66742382ab083d99547c7d1e7597e6a0a",
+        "startedAt": "2026-07-28T09:02:02.059Z",
+        "finishedAt": "2026-07-28T09:02:04.774Z",
+        "latencyMs": 2714.9770080000017,
+        "validity": "valid",
+        "category": "مطر",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 67,
+          "outputTokens": 6
+        }
+      }
+    },
+    {
+      "cellId": "ar:word-random",
+      "repetition": 5,
+      "requestHash": "a83050aa6440a4fa584e6c650d4c4f3b09566255b255ffb0ae2692e840012e49",
+      "referenceFirst": true,
+      "startGapMs": 0.42095999998855405,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "ar:word-random",
+        "repetition": 5,
+        "requestHash": "a83050aa6440a4fa584e6c650d4c4f3b09566255b255ffb0ae2692e840012e49",
+        "startedAt": "2026-07-28T09:02:06.872Z",
+        "finishedAt": "2026-07-28T09:02:09.540Z",
+        "latencyMs": 2667.901960999996,
+        "validity": "valid",
+        "category": "موزة",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 453,
+          "outputTokens": 7
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "ar:word-random",
+        "repetition": 5,
+        "requestHash": "a83050aa6440a4fa584e6c650d4c4f3b09566255b255ffb0ae2692e840012e49",
+        "startedAt": "2026-07-28T09:02:06.872Z",
+        "finishedAt": "2026-07-28T09:02:09.613Z",
+        "latencyMs": 2740.5804819999903,
+        "validity": "valid",
+        "category": "مطر",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 66,
+          "outputTokens": 6
+        }
+      }
+    },
+    {
+      "cellId": "ar:word-random",
+      "repetition": 6,
+      "requestHash": "7e015aaaeeb67d92358af2518f045fa5b53d8b6593184645fce387366fbaf865",
+      "referenceFirst": false,
+      "startGapMs": 0.3817739999940386,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "ar:word-random",
+        "repetition": 6,
+        "requestHash": "7e015aaaeeb67d92358af2518f045fa5b53d8b6593184645fce387366fbaf865",
+        "startedAt": "2026-07-28T09:02:09.613Z",
+        "finishedAt": "2026-07-28T09:02:10.935Z",
+        "latencyMs": 1321.5971870000067,
+        "validity": "valid",
+        "category": "مظلة",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 451,
+          "outputTokens": 7
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "ar:word-random",
+        "repetition": 6,
+        "requestHash": "7e015aaaeeb67d92358af2518f045fa5b53d8b6593184645fce387366fbaf865",
+        "startedAt": "2026-07-28T09:02:09.613Z",
+        "finishedAt": "2026-07-28T09:02:11.524Z",
+        "latencyMs": 1911.0021899999992,
+        "validity": "valid",
+        "category": "شجرة",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 64,
+          "outputTokens": 6
+        }
+      }
+    },
+    {
+      "cellId": "ar:word-random",
+      "repetition": 7,
+      "requestHash": "e25f90f9a771502e73055e5d306b690e73685b0768258e5caa8db16f2a54118a",
+      "referenceFirst": true,
+      "startGapMs": 0.40352799999527633,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "ar:word-random",
+        "repetition": 7,
+        "requestHash": "e25f90f9a771502e73055e5d306b690e73685b0768258e5caa8db16f2a54118a",
+        "startedAt": "2026-07-28T09:02:11.524Z",
+        "finishedAt": "2026-07-28T09:02:13.836Z",
+        "latencyMs": 2311.657831000004,
+        "validity": "valid",
+        "category": "مجرة",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 454,
+          "outputTokens": 6
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "ar:word-random",
+        "repetition": 7,
+        "requestHash": "e25f90f9a771502e73055e5d306b690e73685b0768258e5caa8db16f2a54118a",
+        "startedAt": "2026-07-28T09:02:11.525Z",
+        "finishedAt": "2026-07-28T09:02:13.560Z",
+        "latencyMs": 2034.9624249999906,
+        "validity": "valid",
+        "category": "مطر",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 67,
+          "outputTokens": 6
+        }
+      }
+    },
+    {
+      "cellId": "ar:word-random",
+      "repetition": 8,
+      "requestHash": "f776b10e0db5e667fa02ed5a7e9a584c1b0ffbc32f80fb4b14769aed5572baf2",
+      "referenceFirst": false,
+      "startGapMs": 0.4004480000003241,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "ar:word-random",
+        "repetition": 8,
+        "requestHash": "f776b10e0db5e667fa02ed5a7e9a584c1b0ffbc32f80fb4b14769aed5572baf2",
+        "startedAt": "2026-07-28T09:02:13.837Z",
+        "finishedAt": "2026-07-28T09:02:15.781Z",
+        "latencyMs": 1943.7096010000096,
+        "validity": "valid",
+        "category": "غيمة",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 455,
+          "outputTokens": 6
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "ar:word-random",
+        "repetition": 8,
+        "requestHash": "f776b10e0db5e667fa02ed5a7e9a584c1b0ffbc32f80fb4b14769aed5572baf2",
+        "startedAt": "2026-07-28T09:02:13.836Z",
+        "finishedAt": "2026-07-28T09:02:15.947Z",
+        "latencyMs": 2110.2888620000012,
+        "validity": "valid",
+        "category": "سحابة",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 68,
+          "outputTokens": 7
+        }
+      }
+    },
+    {
+      "cellId": "ar:word-random",
+      "repetition": 9,
+      "requestHash": "26217438283741a258efbf461b0047436b39228caa15bb23039ca4a6318675d3",
+      "referenceFirst": false,
+      "startGapMs": 0.6661000000021886,
+      "complete": true,
+      "reference": {
+        "name": "9router",
+        "model": "cx/gpt-5.6-sol",
+        "cellId": "ar:word-random",
+        "repetition": 9,
+        "requestHash": "26217438283741a258efbf461b0047436b39228caa15bb23039ca4a6318675d3",
+        "startedAt": "2026-07-28T09:02:15.947Z",
+        "finishedAt": "2026-07-28T09:02:17.376Z",
+        "latencyMs": 1428.8635510000022,
+        "validity": "valid",
+        "category": "برتقالة",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 453,
+          "outputTokens": 7
+        }
+      },
+      "target": {
+        "name": "AiCodeWith",
+        "model": "gpt-5.6-sol",
+        "cellId": "ar:word-random",
+        "repetition": 9,
+        "requestHash": "26217438283741a258efbf461b0047436b39228caa15bb23039ca4a6318675d3",
+        "startedAt": "2026-07-28T09:02:15.947Z",
+        "finishedAt": "2026-07-28T09:02:19.216Z",
+        "latencyMs": 3269.0906200000027,
+        "validity": "valid",
+        "category": "مطر",
+        "responseModel": "gpt-5.6-sol",
+        "reasoningDisabled": true,
+        "usage": {
+          "inputTokens": 66,
+          "outputTokens": 6
+        }
+      }
+    }
+  ],
+  "conclusion": "Protocol schema ambiguity reduced. Product-surface and endpoint-context ambiguity remain; no 1% error guarantee."
+}

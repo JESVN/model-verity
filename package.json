@@ -1,0 +1,77 @@
+{
+  "name": "model-verity",
+  "version": "0.1.0",
+  "description": "Local CLI + Web tool to audit non-official AI providers via single-token behavioral fingerprints",
+  "type": "module",
+  "bin": {
+    "model-verity": "dist/cli/index.js"
+  },
+  "scripts": {
+    "dev:ui": "vite --config src/web/vite.config.ts",
+    "preview:ui": "vite --config src/web/vite.config.ts",
+    "build:ui": "vite build --config src/web/vite.config.ts",
+    "build:library": "node scripts/build-builtin-library.mjs",
+    "build:calibration": "node scripts/build-v2-calibration.mjs",
+    "build:node": "tsup && mkdir -p dist/data && cp src/data/builtin-fingerprints.json.gz dist/data/builtin-fingerprints.json.gz && cp 第三方声明.md dist/data/第三方声明.md",
+    "smoke:v2": "tsx scripts/smoke-v2-candidate.ts",
+    "build": "rm -rf dist && npm run build:ui && npm run build:node",
+    "typecheck:web": "tsc -p tsconfig.json --noEmit",
+    "typecheck:node": "tsc -p tsconfig.node.json --noEmit",
+    "typecheck": "npm run typecheck:web && npm run typecheck:node",
+    "start": "node dist/cli/index.js start",
+    "test": "MODEL_VERITY_ALLOW_PRIVATE_ENDPOINTS=1 node --test --import tsx 'test/**/*.test.ts'",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build && npm audit --omit=dev --audit-level=high --registry=https://registry.npmjs.org",
+    "install:dev": "npm install --include=dev"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "llm",
+    "fingerprint",
+    "audit",
+    "cli"
+  ],
+  "license": "MIT",
+  "author": "lennex",
+  "files": [
+    "dist",
+    "docs/v2实施计划.md",
+    "docs/v3实施计划.md",
+    "docs/VeriDrop开源仓库研究-20260729.md",
+    "docs/9router-gpt-5.5-验证分析.md",
+    "docs/验证协议.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public",
+    "provenance": false
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^26.1.1",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^4.5.2",
+    "tsup": "^8.5.1",
+    "tsx": "^4.23.1",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5"
+  },
+  "dependencies": {
+    "better-sqlite3": "^13.0.1",
+    "open": "^11.0.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "optionalDependencies": {
+    "keytar": "^7.9.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JESVN/model-verity.git"
+  },
+  "homepage": "https://github.com/JESVN/model-verity"
+}
