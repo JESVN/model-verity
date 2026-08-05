@@ -122,16 +122,16 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
     }
   };
 
-  const applySelected = async () => {
-    const modelIds = [...selected].sort((a, b) => a.localeCompare(b));
-    if (!modelIds.length) { setError("请先勾选要更新的模型。"); return; }
+  const applySelected = async (modelIds: string[]) => {
+    const ids = [...modelIds].sort((a, b) => a.localeCompare(b));
+    if (!ids.length) { setError("请先勾选要更新的模型。"); return; }
     setApplying(true);
     setError("");
     try {
-      const next = await api.builtinLibraryUpdateApply(modelIds);
+      const next = await api.builtinLibraryUpdateApply(ids);
       setStatus(next);
       setSelected(new Set());
-      setNotice(`已更新为内置参考（${modelIds.length} 个模型）。`);
+      setNotice(`已更新为内置参考（${ids.length} 个模型）。`);
       onLibraryChanged?.();
     } catch (value) {
       setError(apiErrorMessage(value instanceof Error ? value.message : String(value)));
@@ -258,6 +258,7 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
   const newModels = filteredModels.filter((model) => model.qualified && !currentBuiltinIds.has(model.model));
   const unqualifiedModels = filteredModels.filter((model) => !model.qualified);
   const selectedIn = (models: typeof catalogModels) => models.filter((model) => selected.has(model.model)).length;
+  const selectedIdsIn = (models: typeof catalogModels) => models.filter((model) => selected.has(model.model)).map((model) => model.model);
   const catalogApplied = Boolean(status?.catalog.recordId && status.current.recordId === status.catalog.recordId);
   const catalogReady = Boolean(status?.catalog.ready && status.catalog.models.length);
 
@@ -407,6 +408,12 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
                     </label>
                   ))}
                 </div>
+                <div className="builtin-group-actions">
+                  <button className="btn btn-primary" disabled={applying || selectedIn(builtinModels) === 0} onClick={() => void applySelected(selectedIdsIn(builtinModels))}>
+                    {applying ? "处理中…" : `更新内置样本（${selectedIn(builtinModels)}）`}
+                  </button>
+                  <span className="builtin-status-dim">仅替换本区勾选的内置样本指纹，不影响其他模型。</span>
+                </div>
               </section>
             )}
 
@@ -427,6 +434,12 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
                       <span className="tone-usable">合格 · {model.nValid} 有效样本</span>
                     </label>
                   ))}
+                </div>
+                <div className="builtin-group-actions">
+                  <button className="btn btn-primary" disabled={applying || selectedIn(newModels) === 0} onClick={() => void applySelected(selectedIdsIn(newModels))}>
+                    {applying ? "处理中…" : `下载新样本（${selectedIn(newModels)}）`}
+                  </button>
+                  <span className="builtin-status-dim">下载后同样成为内置参考（同 ID 替换新快照，可回滚）。</span>
                 </div>
               </section>
             )}
@@ -452,21 +465,16 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
               <div className="builtin-status-dim builtin-empty-hint">没有匹配“{query.trim()}”的模型</div>
             )}
 
-            <div className="builtin-list-footer">
-              <span className="builtin-status-dim">
-                {trimmedQuery ? `${builtinModels.length + newModels.length} 个匹配` : `${builtinModels.length + newModels.length} 个合格模型`}
-                {unqualifiedCount > 0 && (
-                  <button className="btn btn-ghost builtin-inline-toggle" onClick={() => setShowUnqualified((current) => !current)}>
-                    {showUnqualified ? "收起不合格" : `显示不合格（${unqualifiedCount}）`}
-                  </button>
-                )}
-              </span>
-              <div className="reference-version-actions">
-                <button className="btn btn-primary" disabled={applying || !selected.size} onClick={() => void applySelected()}>
-                  {applying ? "更新中…" : `${copy.apply}（${selected.size}）`}
+            {unqualifiedCount > 0 && (
+              <div className="builtin-list-footer">
+                <span className="builtin-status-dim">
+                  {trimmedQuery ? `${builtinModels.length + newModels.length} 个匹配` : `${builtinModels.length + newModels.length} 个合格模型`}
+                </span>
+                <button className="btn btn-ghost" onClick={() => setShowUnqualified((current) => !current)}>
+                  {showUnqualified ? "收起不合格" : `显示不合格（${unqualifiedCount}）`}
                 </button>
               </div>
-            </div>
+            )}
           </div>
         )}
 

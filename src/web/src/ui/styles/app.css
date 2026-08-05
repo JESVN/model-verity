@@ -2833,3 +2833,4 @@
 .builtin-group-head { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:6px; }
 .builtin-group-head strong { font-size:14px; }
 .builtin-inline-toggle { margin-left:8px; padding:2px 8px; font-size:11px; }
+.builtin-group-actions { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:10px; }
