@@ -3,7 +3,6 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { gunzipSync } from "node:zlib";
 import type { CellDistribution } from "../core/stats/index.js";
-
 export const BUILTIN_REFERENCE_PREFIX = "builtin:pamela:";
 
 export interface BuiltinReference {
@@ -61,8 +60,45 @@ interface BuiltinLibrary {
 }
 
 let cached: BuiltinLibrary | undefined;
+
+// Optional runtime overlay: when the server updates the built-in library from
+// Zenodo, the updated library is stored in the data directory and read here
+// in preference to the bundled artifact. Configure once at startup.
+let overlayDir: string | undefined;
+
+export function configureLibraryOverlay(dir: string | undefined): void {
+  overlayDir = dir;
+  cached = undefined;
+}
+
+export function invalidateLibraryCache(): void {
+  cached = undefined;
+}
+
+function loadOverlay(dir: string): BuiltinLibrary | undefined {
+  const index = JSON.parse(readFileSync(resolve(dir, "library-index.json"), "utf8")) as { currentFile?: string };
+  if (!index.currentFile) return undefined;
+  const path = resolve(dir, index.currentFile);
+  const parsed = JSON.parse(gunzipSync(readFileSync(path)).toString("utf8")) as BuiltinLibrary;
+  if (parsed.protocol.cellIds.length !== 40 || parsed.models.some((model) => !model.id.startsWith(BUILTIN_REFERENCE_PREFIX))) {
+    return undefined;
+  }
+  return parsed;
+}
+
 function library(): BuiltinLibrary {
   if (cached) return cached;
+  if (overlayDir) {
+    try {
+      const overlay = loadOverlay(overlayDir);
+      if (overlay) {
+        cached = overlay;
+        return cached;
+      }
+    } catch {
+      // invalid overlay -> fall back to the bundled artifact
+    }
+  }
   const moduleDir = fileURLToPath(new URL(".", import.meta.url));
   const path = resolve(moduleDir, "../data/builtin-fingerprints.json.gz");
   cached = JSON.parse(gunzipSync(readFileSync(path)).toString("utf8")) as BuiltinLibrary;

@@ -10,6 +10,7 @@ import {
   writeRuntime,
 } from "./runtime.js";
 import { Api, HttpError, sendJson } from "./api.js";
+import { configureLibraryOverlay } from "./builtin-library.js";
 import { Repository } from "./db.js";
 import { SecretStore } from "./secrets.js";
 import { VERSION } from "../version.js";
@@ -88,6 +89,7 @@ export async function startServer(options: StartServerOptions = {}) {
   await access(join(webRoot, "index.html"));
   const repo = new Repository(dataDir);
   repo.recoverInterruptedRuns();
+  configureLibraryOverlay(join(dataDir, "builtin-library"));
   const api = new Api(repo, new SecretStore(dataDir), dataDir);
 
   const server = createServer(async (req: IncomingMessage, res: ServerResponse) => {

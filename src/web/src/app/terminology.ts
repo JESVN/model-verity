@@ -68,6 +68,33 @@ export function qualityHelp(value:string|undefined){return value==="approved"?"�
 export function connectionCategoryLabel(value:string|undefined){return ({success:"连接成功",auth:"鉴权失败",rate_limit:"触发限流",timeout:"请求超时",network:"网络错误",server:"上游服务错误",invalid_response:"响应格式无法解析",cancelled:"已取消",other:"其他错误"} as Record<string,string>)[value??""]??value??"未记录";}
 export function verificationModeLabel(value:string){return value==="paired"?"实时双端配对":value==="reference_enrollment"?"创建参考样本":"参考样本比对";}
 
+export const BUILTIN_UPDATE_COPY = {
+  title: "内置研究参考更新",
+  help: "内置研究参考来自 Zenodo 研究数据集（DOI 10.5281/zenodo.21278557，CC BY 4.0）。检查更新发现新版本后，可下载数据集（首次需数百 MB，仅下载一次，之后从缓存读取）并选择要纳入的模型；同 ID 模型会直接替换为新快照，保留最近 3 个版本可回滚。",
+  check: "检查更新",
+  prepare: "下载并准备新数据集",
+  apply: "更新所选模型",
+  rollback: "回滚到上一版本",
+  cleanCache: "清理数据集缓存",
+  cancel: "取消",
+  refresh: "重新检查",
+  current: "当前内置库",
+  latest: "Zenodo 最新版本",
+  upToDate: "已是最新版本，无需更新",
+  updateAvailable: "在 Zenodo 上发现更新版本",
+  notChecked: "尚未检查，点击“检查更新”获取最新版本",
+  bundled: "打包基线",
+  runtime: "运行时更新",
+  downloading: "下载中（首次需数百 MB，之后从缓存读取）",
+  catalogReady: "模型列表已就绪，勾选后执行更新",
+  selectHandled: "仅能纳入通过 40-cell 与有效样本门槛的模型",
+  incompatible: "新数据集与当前电池 prompt 不一致，系统已拒绝更新",
+  prepareDone: "数据集已就绪",
+  noneQualified: "没有可用模型",
+  noHistory: "无回滚可用",
+  lastErrorTitle: "最近一次检查出错",
+};
+
 export function apiErrorMessage(value:string):string {
   const rules:[RegExp,string][]=[
     [/another task is active/i,"已有验证、参考采集或连接测试正在进行。请等待它结束或先取消，再启动新任务。"],
@@ -89,6 +116,13 @@ export function apiErrorMessage(value:string):string {
     [/reference collection did not complete the frozen manifest/i,"参考采集未发布：预定问题和次数没有全部完成，通常由预算用尽、取消或请求失败造成。"],
     [/server restarted before run completed/i,"服务在任务完成前重启。系统不会自动重发真实请求；请重新检查预算后手动启动。"],
     [/cancelled by user/i,"任务已由用户取消。"],
+    [/run the update check first/i,"请先点击“检查更新”获取最新数据集版本，再执行后续操作。"],
+    [/another Zenodo update task is active/i,"已有数据集准备任务在运行，请等待其完成后再次操作。"],
+    [/Zenodo returned HTTP/i,"Zenodo 服务暂时不可用，请稍后重试。"],
+    [/resolved to a private address/i,"Zenodo 地址解析到内网或保留地址，已按安全策略拒绝连接。"],
+    [/(dataset too large|exceeds \d+ bytes)/i,"数据集超过大小上限，已拒绝下载。请删除缓存后重试。"],
+    [/dataset zip file not found/i,"Zenodo 记录中未找到数据集压缩包，无法准备更新。"],
+    [/not .* prepared|尚未准备/i,"数据集尚未下载或准备完成，请先执行“下载并准备新数据集”。"],
   ];
   for(const [pattern,message] of rules)if(pattern.test(value))return value.replace(pattern,message);
   return value;

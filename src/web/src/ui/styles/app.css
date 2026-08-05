@@ -2771,3 +2771,16 @@
     padding-inline: 10px;
   }
 }
+
+/* 内置研究参考更新面板 */
+.reference-version-actions { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:12px; }
+.builtin-model-list { display:flex; flex-direction:column; gap:6px; max-height:320px; overflow:auto; margin-top:12px; padding:10px; border:1px solid var(--border-strong); border-radius:12px; }
+.builtin-model-row { display:flex; align-items:center; gap:10px; padding:6px 8px; border-radius:8px; cursor:pointer; }
+.builtin-model-row:hover { background: var(--bg-subtle); }
+.builtin-model-row.is-disabled { opacity:.55; cursor:not-allowed; }
+.builtin-model-name { flex:1; min-width:0; font-family:var(--font-mono); font-size:13px; overflow-wrap:anywhere; }
+.builtin-version-list { display:flex; flex-direction:column; gap:4px; margin:8px 0 0; padding-left:16px; font-size:12px; color:var(--text-tertiary); }
+.reference-progress { position:relative; flex:1 1 220px; height:10px; margin-top:6px; overflow:hidden; background:var(--bg-subtle); border-radius:99px; }
+.reference-progress-fill { height:100%; background:var(--accent); border-radius:99px; transition:width .3s var(--ease-out); }
+.reference-progress-label { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--text-secondary); }
+.reference-help { margin:0 0 12px; font-size:13px; color:var(--text-secondary); }

@@ -9,6 +9,7 @@ import { RunManager } from "./run-manager.js";
 import { maskSecret, SecretStore } from "./secrets.js";
 import { ConnectionTestManager } from "./connection-tests.js";
 import { V2RunManager } from "./v2-run-manager.js";
+import { ZenodoUpdateManager, ZenodoUpdateError } from "./zenodo-update.js";
 import { CredentialSessionStore } from "./credential-sessions.js";
 import { createHash } from "node:crypto";
 import { ReportBindingStore } from "./report-binding.js";
@@ -53,11 +54,13 @@ export class Api {
   readonly v2Runs: V2RunManager;
   readonly credentialSessions = new CredentialSessionStore();
   readonly reportBindings:ReportBindingStore;
+  readonly libraryUpdate: ZenodoUpdateManager;
   constructor(readonly repo: Repository, readonly secrets: SecretStore, readonly dataDir: string) {
     this.runs = new RunManager(repo, secrets);
     this.connectionTests = new ConnectionTestManager(repo, secrets);
     this.reportBindings=new ReportBindingStore(dataDir);
     this.v2Runs = new V2RunManager(repo, secrets, this.credentialSessions, this.reportBindings);
+    this.libraryUpdate = new ZenodoUpdateManager({ dataDir });
   }
 
   async shutdown(): Promise<void> {
@@ -150,6 +153,16 @@ export class Api {
     const governanceMatch=pathname.match(/^\/api\/v2\/reference-versions\/([^/]+)\/governance-events$/);
     if(governanceMatch&&method==="POST") { await this.requireWritable();const input=await body(req);const referenceVersionId=decodeURIComponent(governanceMatch[1]);try{const event=this.repo.addReferenceGovernanceEvent(referenceVersionId,governanceEvent(input.eventType),input.details??{});sendJson(res,201,{...event,version:this.repo.getReferenceVersionV2(referenceVersionId)});}catch(error){throw new HttpError(404,error instanceof Error?error.message:String(error));}return true; }
     if(pathname==="/api/v2/calibration/profiles" && method==="GET") { sendJson(res,200,{items:this.repo.listCalibrations()}); return true; }
+    if(pathname==="/api/v2/references/update/status" && method==="GET") { sendJson(res,200,this.libraryUpdate.status()); return true; }
+    if(pathname==="/api/v2/references/update/check" && method==="POST") { await this.requireWritable(); const input=await body(req); try { sendJson(res,200,await this.libraryUpdate.check(Boolean(input.refresh))); } catch(error){ if(error instanceof ZenodoUpdateError) throw new HttpError(error.status,error.message); throw error; } return true; }
+    if(pathname==="/api/v2/references/update/prepare" && method==="POST") { await this.requireWritable(); if(this.connectionTests.active()||this.repo.activeRunCount()||this.repo.activeV2RunCount())throw new HttpError(409,"another task is active"); try { sendJson(res,202,this.libraryUpdate.prepare()); } catch(error){ if(error instanceof ZenodoUpdateError) throw new HttpError(error.status,error.message); throw error; } return true; }
+    const updateCancelMatch=pathname.match(/^\/api\/v2\/references\/update\/jobs\/([^/]+)\/cancel$/);
+    if(updateCancelMatch&&method==="POST") { await this.requireWritable(); this.libraryUpdate.cancelPrepare(); sendJson(res,200,this.libraryUpdate.status()); return true; }
+    const updateJobMatch=pathname.match(/^\/api\/v2\/references\/update\/jobs\/([^/]+)$/);
+    if(updateJobMatch&&method==="GET") { const job=this.libraryUpdate.jobFor(updateJobMatch[1]); if(!job)throw new HttpError(404,"update job not found"); sendJson(res,200,job); return true; }
+    if(pathname==="/api/v2/references/update" && method==="POST") { await this.requireWritable(); if(this.connectionTests.active()||this.repo.activeRunCount()||this.repo.activeV2RunCount())throw new HttpError(409,"another task is active"); const input=await body(req); const modelIds=Array.isArray(input.modelIds)?input.modelIds.map((v:unknown)=>string(v,"modelId",300)):[]; try { sendJson(res,200,this.libraryUpdate.updateFromCatalog(modelIds)); } catch(error){ if(error instanceof ZenodoUpdateError) throw new HttpError(error.status,error.message); throw error; } return true; }
+    if(pathname==="/api/v2/references/update/rollback" && method==="POST") { await this.requireWritable(); if(this.connectionTests.active()||this.repo.activeRunCount()||this.repo.activeV2RunCount())throw new HttpError(409,"another task is active"); try { sendJson(res,200,this.libraryUpdate.rollback()); } catch(error){ if(error instanceof ZenodoUpdateError) throw new HttpError(error.status,error.message); throw error; } return true; }
+    if(pathname==="/api/v2/references/update/cache/clean" && method==="POST") { await this.requireWritable(); sendJson(res,200,this.libraryUpdate.cleanCache()); return true; }
     if(pathname==="/api/v2/calibration/import" && method==="POST") { await this.requireWritable(); if(process.env.MODEL_VERITY_ALLOW_CALIBRATION_IMPORT!=="1")throw new HttpError(403,"calibration import requires local administrator enablement"); const input=await body(req); const artifact=validateCalibrationArtifact(input.artifact as CalibrationArtifact); const {manifestHash,...unsigned}=artifact; const expected=artifactHash(unsigned); if(artifact.manifestHash!==expected)throw new HttpError(400,"calibration manifest hash mismatch"); const saved=this.repo.saveCalibration({id:artifact.id,version:artifact.version,vendor:artifact.vendor,product:artifact.product,surface:artifact.surface,profile:artifact.profile,artifact,active:Boolean(input.active),createdAt:artifact.createdAt});sendJson(res,201,saved);return true; }
     if(pathname==="/api/v2/verification-runs" && method==="GET") { sendJson(res,200,{items:this.repo.listV2Runs().filter(isCurrentScoredRun)}); return true; }
     if(pathname==="/api/v2/references" && method==="GET") { sendJson(res,200,{items:[...this.repo.listReferenceVersionsV2().map((value)=>publicVersionReference(this.repo,value)),...listBuiltinReferences().map(publicBuiltinReference),...this.repo.listReferences().map((ref:any)=>({...publicReference(ref),level:'L3',identity:{vendor:'unknown',product:ref.modelClaimed,surface:'unknown'},freshnessStatus:'usable',qualityStatus:'approved'}))]});return true; }

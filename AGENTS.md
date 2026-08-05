@@ -35,6 +35,8 @@ Manifest 当前为 `pamela-challenge@2`，必须保存 `promptMode`：
 
 内置 `openai/gpt-5.5` 精确代表 2026-07-06 经 OpenRouter/OpenAI provider 采集的 `gpt-5.5-20260423` serving 快照，不代表所有官方账号、协议或产品面。旧 76.7/79.6 分记录保持冻结，不重算。
 
+内置库支持“参考样本”页在线更新（`src/server/zenodo-update.ts` + `/api/v2/references/update/*`）：检查更新 → 下载 Zenodo 数据集（缓存上限 2GB、一键清理、`MODEL_VERITY_ZENODO_PROXY` 可选代理，默认直连）→ 勾选模型应用。同 ID 模型整体替换新快照（保留最近 3 版本可回滚）；新数据集 `prompts_sha256` 与本地电池不一致时拒绝更新，避免跨 prompt 不可比。更新只写数据目录运行时库（`builtin-library/`），不改 dist 基线、不回写 git；测试用本地 mock Zenodo，不访问真实站点。
+
 自建参考固定真实请求预算：Quick 20、Audit 80、Full 240。质量门禁：成功率 ≥90%，可用 cells ≥75% 且至少 4 个，满足每 cell 有效样本门槛，reasoning 关闭确认，完整执行冻结 manifest。0 自动重试，包括禁止 reasoning 兼容性补发。
 
 ## 安全与生产操作

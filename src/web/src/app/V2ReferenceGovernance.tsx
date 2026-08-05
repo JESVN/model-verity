@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { LoadingState, RunningPanel, Select } from "@ui/index";
 import { api, type ApiProtocol, type ApiProvider, type ApiV2Run } from "./api";
+import { V2BuiltinLibraryUpdate } from "./V2BuiltinLibraryUpdate";
 import {
   PROTOCOL_OPTIONS,
   REFERENCE_LEVEL_OPTIONS,
@@ -308,6 +309,8 @@ export function V2ReferenceGovernance({
           <span><strong>{versions.length}</strong>版本</span>
         </div>
       </div>
+
+      <V2BuiltinLibraryUpdate onLibraryChanged={() => void reload()} />
 
       {run && !creating
         ? <div className={`connection-inline ${run.status === "completed" ? "is-success" : "is-failed"}`} role="status">

@@ -124,7 +124,7 @@ async function assertSafeProviderUrl(raw:string):Promise<void> {
   const addresses=isIP(url.hostname)?[{address:url.hostname}]:await lookup(url.hostname,{all:true,verbatim:true});
   if(addresses.some(({address})=>isPrivateAddress(address))&&process.env.MODEL_VERITY_ALLOW_PRIVATE_ENDPOINTS!=="1")throw new AdapterError("private provider endpoint blocked by SSRF policy",{retryable:false});
 }
-function isPrivateAddress(address:string):boolean {
+export function isPrivateAddress(address:string):boolean {
   const value=address.toLowerCase();
   if(value==="::1"||value==="::"||value.startsWith("fe80:")||value.startsWith("fc")||value.startsWith("fd"))return true;
   const mapped=value.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/)?.[1];const ip=mapped??value;

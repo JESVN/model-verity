@@ -130,6 +130,10 @@ docker compose up -d --build
 - 原始采样经 OpenRouter 聚合路由完成；
 - 当前库包含 33 个主流厂商模型参考（claude、openai、gemini、deepseek、kimi、qwen、glm、grok），均满足 40-cell 和有效样本门槛。
 
+#### 在线更新内置研究参考
+
+“参考样本”页提供内置研究参考的在线更新：点击“检查更新”查询 Zenodo 是否发布了更新版本；有新版本时下载数据集（首次需数百 MB，缓存上限 2 GB，可一键清理），从列表勾选要纳入的模型后执行更新。同 ID 模型直接替换为新快照，保留最近 3 个版本可回滚。下载走 Zenodo 官方 API，逐跳校验目标地址并拒绝私网/保留地址；如需代理访问 Zenodo，显式设置 `MODEL_VERITY_ZENODO_PROXY=https://代理地址`（默认直连）。新数据集的 prompt 与当前电池不一致时拒绝更新，避免跨 prompt 不可比。
+
 ### 自建参考样本
 
 在“参考样本”页可从用户信任的 endpoint 创建版本化行为基线：
