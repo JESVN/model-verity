@@ -117,6 +117,8 @@ interface MockContext {
   zip: Buffer;
   manifest: Record<string, unknown>;
   metadataCalls: number;
+  slow: boolean;
+  abortedByClient: boolean;
 }
 
 async function startMock(): Promise<MockContext> {
@@ -126,6 +128,8 @@ async function startMock(): Promise<MockContext> {
     zip: Buffer.alloc(0),
     manifest: GOOD_MANIFEST,
     metadataCalls: 0,
+    slow: false,
+    abortedByClient: false,
   };
   const server = createServer((req, res) => {
     const url = new URL(req.url ?? "/", `http://127.0.0.1:${context.port}`);
@@ -138,7 +142,20 @@ async function startMock(): Promise<MockContext> {
     if (url.pathname === "/files/pamela.zip") {
       res.setHeader("content-type", "application/zip");
       res.setHeader("content-length", String(context.zip.length));
-      res.end(context.zip);
+      if (!context.slow) {
+        res.end(context.zip);
+        return;
+      }
+      res.on("close", () => { if (!res.writableEnded) context.abortedByClient = true; });
+      const chunk = 128 * 1024;
+      let offset = 0;
+      const next = () => {
+        if (offset >= context.zip.length) { res.end(); return; }
+        const part = context.zip.subarray(offset, offset + chunk);
+        offset += part.length;
+        if (!res.write(part)) { res.once("drain", () => setTimeout(next, 25)); } else { setTimeout(next, 25); }
+      };
+      next();
       return;
     }
     res.statusCode = 404;
@@ -254,6 +271,44 @@ test("Zenodo update: incompatible prompt hash is refused", async () => {
     assert.equal(prepared.prepareJob?.status, "failed");
     assert.match(prepared.prepareJob?.error ?? "", /prompt/i);
     assert.equal(prepared.catalog.ready, false);
+  } finally {
+    await (mock as any).closeMock();
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("Zenodo update: cancel aborts an in-flight download promptly with progress updates", async () => {
+  const mock = await startMock();
+  mock.zip = datasetZip(GOOD_MANIFEST, [["openai/gpt-5.6-sol", 400]]); // ~2MB
+  mock.slow = true; // stream in chunks with delay
+  const dir = await mkdtemp(join(tmpdir(), "mv-zenodo-cancel-"));
+  const manager = makeManager(dir, mock);
+  try {
+    await manager.check(true);
+    manager.prepare();
+    let sawProgress = false;
+    for (let i = 0; i < 200; i += 1) {
+      const status = manager.status();
+      const job = status.prepareJob;
+      if (job && job.status === "running" && job.progress > 5 && !sawProgress) { sawProgress = true; break; }
+      if (job && (job.status === "done" || job.status === "failed")) break;
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    }
+    assert.equal(sawProgress, true, "progress should be reported during download");
+    const started = Date.now();
+    manager.cancelPrepare();
+    for (let i = 0; i < 100; i += 1) {
+      const job = manager.status().prepareJob;
+      if (job && job.status === "canceled") break;
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    }
+    assert.equal(manager.status().prepareJob?.status, "canceled");
+    assert.ok(Date.now() - started < 2000, "cancel must take effect quickly");
+    for (let i = 0; i < 100 && !mock.abortedByClient; i += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    }
+    assert.equal(mock.abortedByClient, true, "client should abort the slow download");
+    assert.equal(manager.status().cacheBytes, 0, "partial download must be cleaned up");
   } finally {
     await (mock as any).closeMock();
     await rm(dir, { recursive: true, force: true });

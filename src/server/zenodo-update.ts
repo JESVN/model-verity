@@ -220,31 +220,42 @@ export class ZenodoUpdateManager {
     }
   }
 
-  private async fetchJson(rawUrl: string): Promise<any> {
-    const response = await this.fetchZenodo(rawUrl, { headers: { accept: "application/json" } });
+  private async fetchJson(rawUrl: string, signal?: AbortSignal): Promise<any> {
+    const response = await this.fetchZenodo(rawUrl, { headers: { accept: "application/json" }, signal });
     const text = await response.text();
     if (!response.ok) throw new ZenodoUpdateError(502, `Zenodo returned HTTP ${response.status}`);
     try { return JSON.parse(text); } catch { throw new ZenodoUpdateError(502, "Zenodo returned invalid JSON"); }
   }
 
-  private async downloadToFile(rawUrl: string, dest: string, capBytes: number): Promise<number> {
-    const response = await this.fetchZenodo(rawUrl, {});
+  private async downloadToFile(
+    rawUrl: string,
+    dest: string,
+    capBytes: number,
+    signal?: AbortSignal,
+    onProgress?: (bytes: number, total: number) => void,
+  ): Promise<number> {
+    const response = await this.fetchZenodo(rawUrl, { signal });
     if (!response.ok) throw new ZenodoUpdateError(502, `Zenodo download returned HTTP ${response.status}`);
     const total = Number(response.headers.get("content-length") ?? 0);
     if (total > capBytes) throw new ZenodoUpdateError(413, `dataset too large (${total} bytes > ${capBytes})`);
     const out = createWriteStream(dest, { mode: 0o600 });
     let bytes = 0;
+    let lastReport = 0;
     const reader = (response.body as ReadableStream<Uint8Array>).getReader();
     try {
       for (;;) {
+        if (signal?.aborted) throw new ZenodoUpdateError(409, "canceled");
         const { done, value } = await reader.read();
         if (done) break;
         bytes += value.byteLength;
         if (bytes > capBytes) { out.destroy(new Error("size cap exceeded")); throw new ZenodoUpdateError(413, `dataset exceeds ${capBytes} bytes`); }
         await new Promise<void>((resolve, reject) => out.write(value, (error: Error | null | undefined) => (error ? reject(error) : resolve())));
+        if (onProgress && bytes - lastReport >= 1024 * 1024) { lastReport = bytes; onProgress(bytes, total); }
       }
       await new Promise<void>((resolve, reject) => out.end((error: Error | null | undefined) => (error ? reject(error) : resolve())));
+      if (onProgress) onProgress(bytes, total);
     } catch (error) {
+      out.destroy();
       rmSync(dest, { force: true });
       throw error;
     }
@@ -426,12 +437,20 @@ export class ZenodoUpdateManager {
       const zipPath = this.zipPath(recordId);
       let zipBytes = existsSync(zipPath) ? statSync(zipPath).size : 0;
       if (!existsSync(zipPath)) {
-        const record = (await this.fetchJson(`${ZENODO_API_BASE}/${ZENODO_CONCEPT_ID}`)) as ZenodoRecord;
+        const record = (await this.fetchJson(`${ZENODO_API_BASE}/${ZENODO_CONCEPT_ID}`, signal)) as ZenodoRecord;
         const target = record.files?.find((file) => file.key.toLowerCase().endsWith(".zip"));
         if (!target?.links?.self) throw new ZenodoUpdateError(502, "dataset zip file not found in Zenodo record");
         mkdirSync(this.downloadsDir, { recursive: true, mode: 0o700 });
         const tmp = `${zipPath}.part`;
-        zipBytes = await this.downloadToFile(target.links.self, tmp, MAX_DATASET_ZIP_BYTES);
+        zipBytes = await this.downloadToFile(target.links.self, tmp, MAX_DATASET_ZIP_BYTES, signal, (bytes, total) => {
+          const percent = total ? Math.min(40, 5 + Math.floor((bytes / total) * 35)) : 5;
+          this.setJob({
+            progress: percent,
+            message: total
+              ? `下载中 ${(bytes / (1024 * 1024)).toFixed(0)} / ${(total / (1024 * 1024)).toFixed(0)} MB`
+              : "下载中…",
+          });
+        });
         if (signal?.aborted) { rmSync(tmp, { force: true }); throw new ZenodoUpdateError(409, "canceled"); }
         rmSync(zipPath, { force: true });
         renameSync(tmp, zipPath);

@@ -57,13 +57,14 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
         setStatus((current) => (current ? { ...current, prepareJob: job } : current));
         if (job.status === "done" || job.status === "failed" || job.status === "canceled") {
           if (timer.current) window.clearInterval(timer.current);
-          setNotice(job.status === "done" ? copy.prepareDone : job.error ?? "");
-          await load(true);
+          if (job.status === "done") { setNotice(copy.prepareDone); await load(true); }
+          else if (job.status === "failed") setError(job.error ?? "数据集准备失败。");
+          else setNotice("已取消数据集下载。");
         }
       } catch {
         if (timer.current) window.clearInterval(timer.current);
       }
-    }, 1500);
+    }, 1200);
   };
 
   const check = async () => {
@@ -147,6 +148,19 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
     });
   };
 
+  const cancelJob = async () => {
+    const current = status?.prepareJob;
+    if (!current) return;
+    try {
+      const next = await api.builtinLibraryUpdateCancelJob(current.id);
+      if (timer.current) window.clearInterval(timer.current);
+      setStatus(next);
+      setNotice("已取消数据集下载。");
+    } catch (value) {
+      setError(apiErrorMessage(value instanceof Error ? value.message : String(value)));
+    }
+  };
+
   const selectAllQualified = () => {
     setSelected((current) => {
       const next = new Set(current);
@@ -215,31 +229,25 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
         </div>
 
         {status?.updateAvailable && (
-          <div className="reference-version-panel">
-            <div className="reference-version-heading">
-              <strong>准备新数据集</strong>
-              <span className="reference-version-meta">
-                下载一次并缓存（上限 2 GB），之后按模型选择更新，无需重复下载。
-              </span>
-            </div>
-            <div className="reference-version-actions">
-              {!catalogReady && (
-                <button className="btn btn-primary" disabled={jobActive} onClick={() => void prepare()}>
-                  {copy.prepare}
-                </button>
-              )}
-              {jobActive && job && (
-                <>
-                  <button className="btn" disabled={!jobActive} onClick={() => void api.builtinLibraryUpdateCancelJob(job.id).then(() => load(true)).catch(() => undefined)}>
-                    {copy.cancel}
-                  </button>
-                  <div className="reference-progress" role="progressbar" aria-valuenow={job.progress} aria-valuemin={0} aria-valuemax={100}>
-                    <div className="reference-progress-fill" style={{ width: `${job.progress}%` }} />
-                    <span className="reference-progress-label">{job.message} · {job.progress}%</span>
-                  </div>
-                </>
-              )}
-            </div>
+          <div className="builtin-update-panel">
+            <h3>准备新数据集</h3>
+            <p className="builtin-update-help">{copy.prepareHelp}</p>
+            {jobActive && job ? (
+              <div className="builtin-update-progress-row">
+                <div className="builtin-update-progress" role="progressbar" aria-valuenow={job.progress} aria-valuemin={0} aria-valuemax={100}>
+                  <div className="builtin-update-progress-fill" style={{ width: `${job.progress}%` }} />
+                </div>
+                <div className="builtin-update-progress-meta">
+                  <strong>{job.message}</strong>
+                  <span>{job.progress}%</span>
+                </div>
+                <button className="btn" onClick={() => void cancelJob()}>{copy.cancel}</button>
+              </div>
+            ) : !catalogReady ? (
+              <div className="reference-version-actions">
+                <button className="btn btn-primary" onClick={() => void prepare()}>{copy.prepare}</button>
+              </div>
+            ) : null}
           </div>
         )}
 

@@ -73,6 +73,7 @@ export const BUILTIN_UPDATE_COPY = {
   help: "内置研究参考来自 Zenodo 研究数据集（DOI 10.5281/zenodo.21278557，CC BY 4.0）。检查更新发现新版本后，可下载数据集（首次需数百 MB，仅下载一次，之后从缓存读取）并选择要纳入的模型；同 ID 模型会直接替换为新快照，保留最近 3 个版本可回滚。",
   check: "检查更新",
   prepare: "下载并准备新数据集",
+  prepareHelp: "下载一次并缓存（上限 2GB），之后按模型选择更新，无需重复下载。首次需数百 MB，下载中可随时取消。",
   apply: "更新所选模型",
   rollback: "回滚到上一版本",
   cleanCache: "清理数据集缓存",
