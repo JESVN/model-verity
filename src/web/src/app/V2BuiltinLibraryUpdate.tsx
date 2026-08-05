@@ -14,9 +14,30 @@ function formatDate(value: string | undefined): string {
   return Number.isNaN(date.getTime()) ? value : date.toLocaleString("zh-CN", { hour12: false });
 }
 
+type Phase = "idle" | "checking" | "error" | "downloading" | "update_available" | "up_to_date" | "catalog";
+
+const PHASE_COPY: Record<Phase, string> = {
+  idle: "未检查",
+  checking: "检查中…",
+  error: "检查失败",
+  downloading: "下载中…",
+  update_available: "发现新版本",
+  up_to_date: "已是最新版本",
+  catalog: "发现新版本",
+};
+const PHASE_TONE: Record<Phase, string> = {
+  idle: "neutral",
+  checking: "running",
+  error: "failed",
+  downloading: "running",
+  update_available: "review_required",
+  up_to_date: "current",
+  catalog: "review_required",
+};
+
 /**
- * 内置研究参考更新面板：检查 Zenodo 新版本 -> 下载并准备数据集 -> 勾选
- * 模型更新运行时内置库；保留最近 3 个版本可回滚，数据集缓存一键清理。
+ * 内置研究参考更新：检查 Zenodo 新版本 -> 下载并准备数据集 -> 勾选模型更新。
+ * 保留最近 3 个版本可回滚，数据集缓存一键清理，可配置代理。
  */
 export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?: () => void }) {
   const [status, setStatus] = useState<ApiZenodoUpdateStatus | null>(null);
@@ -89,6 +110,7 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
 
   const prepare = async () => {
     setNotice("");
+    setError("");
     try {
       const job = await api.builtinLibraryUpdatePrepare();
       setStatus((current) => (current ? { ...current, prepareJob: job } : current));
@@ -218,91 +240,107 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
   const jobActive = Boolean(job && (job.status === "queued" || job.status === "running"));
   const catalogReady = Boolean(status?.catalog.ready && status.catalog.models.length);
   const canRollback = (status?.versions.length ?? 0) > 1;
+  const hasChecked = Boolean(status?.latest);
+
+  const phase: Phase = checking
+    ? "checking"
+    : jobActive
+      ? "downloading"
+      : status?.lastError
+        ? "error"
+        : catalogReady
+          ? "catalog"
+          : status?.updateAvailable
+            ? "update_available"
+            : hasChecked
+              ? "up_to_date"
+              : "idle";
+
+  const latestText = status?.latest
+    ? `${status.latest.version ?? "（未标注版本）"} · 更新 ${formatDate(status.latest.updated)}`
+    : "";
+  const currentText = status ? `${status.current.libraryVersion} · ${status.current.models} 模型` : "加载中…";
+  const currentSource = status
+    ? `${status.current.source === "runtime" ? "运行时更新" : "打包基线"} · 采集 ${formatDate(status.current.collectedAt)}`
+    : "";
 
   return (
     <section className="reference-group builtin-update-group">
-      <div className="card reference-overview-card">
-        <div className="section-heading">
-          <h2 className="section-title">{copy.title}</h2>
-        </div>
-        <p className="reference-help">{copy.help}</p>
-
-        {error && <div className="connection-inline is-failed" role="alert">{error}</div>}
-        {notice && <div className="connection-inline is-success" role="status">{notice}</div>}
-
-        <div className="reference-overview-header">
-          <div className="reference-overview-copy">
-            <span className="reference-kicker">当前内置库</span>
-            {status ? (
-              <div className="reference-status-detail">
-                <div className="reference-status-badges">
-                  <span className={`tone-${status.current.source === "runtime" ? "usable" : "current"}`}>
-                    {status.current.source === "runtime" ? copy.runtime : copy.bundled}
-                  </span>
-                  <span>{status.current.libraryVersion}</span>
-                  <span>{status.current.models} 个模型</span>
-                  <span>采集 {formatDate(status.current.collectedAt)}</span>
-                </div>
-              </div>
-            ) : (
-              <div className="reference-status-detail">{loading ? "加载中…" : "无法获取状态"}</div>
-            )}
-
-            <span className="reference-kicker">{copy.latest}</span>
-            {status?.latest ? (
-              <div className="reference-status-detail">
-                <div className="reference-status-badges">
-                  <span className={`tone-${status.updateAvailable ? "review_required" : "current"}`}>
-                    {status.updateAvailable ? copy.updateAvailable : copy.upToDate}
-                  </span>
-                  <span>{status.latest.version ?? "（未标注版本）"}</span>
-                  <span>更新 {formatDate(status.latest.updated)}</span>
-                </div>
-              </div>
-            ) : (
-              <div className="reference-status-detail">
-                {loading ? "加载中…" : copy.notChecked}
-                {status?.lastError && <span>（{status.lastError}）</span>}
-              </div>
-            )}
+      <div className="card builtin-update-card">
+        <div className="builtin-update-header">
+          <div>
+            <h2 className="section-title">{copy.title}</h2>
+            <p className="builtin-update-subtitle">内置研究参考来自 Zenodo 数据集，发现新版本后可下载并更新。</p>
           </div>
-          <div className="reference-overview-action">
-            <button className="btn btn-primary" disabled={checking || jobActive} onClick={() => void check()}>
-              {checking ? "检查中…" : (status?.latest ? copy.refresh : copy.check)}
-            </button>
+          <button className="btn btn-primary" disabled={checking || jobActive} onClick={() => void check()}>
+            {checking ? "检查中…" : (hasChecked ? copy.refresh : copy.check)}
+          </button>
+        </div>
+
+        {error && <div className="connection-inline is-failed fade-in-soft" role="alert">{error}</div>}
+        {notice && <div className="connection-inline is-success fade-in-soft" role="status">{notice}</div>}
+
+        {/* 版本状态条：当前 -> 最新 */}
+        <div className="builtin-status-strip fade-in-soft" role="status" aria-live="polite">
+          <div className="builtin-status-cell">
+            <span className="builtin-status-label">当前内置库</span>
+            <span className="builtin-status-value">{currentText}</span>
+            <span className="builtin-status-dim">{currentSource}</span>
+          </div>
+          <div className="builtin-status-arrow" aria-hidden="true">→</div>
+          <div className="builtin-status-cell">
+            <span className="builtin-status-label">Zenodo 最新</span>
+            <span className={`builtin-status-chip tone-${PHASE_TONE[phase]} ${phase === "checking" || phase === "downloading" ? "is-pulsing" : ""}`}>
+              {PHASE_COPY[phase]}
+            </span>
+            <span className="builtin-status-dim">
+              {phase === "up_to_date" || phase === "update_available" || phase === "catalog"
+                ? latestText
+                : phase === "checking"
+                  ? "正在查询 Zenodo…"
+                  : phase === "error"
+                    ? "上次检查未成功"
+                    : ""}
+            </span>
           </div>
         </div>
 
-        {status?.updateAvailable && (
-          <div className="builtin-update-panel">
-            <h3>准备新数据集</h3>
+        {/* 发现新版本 -> 下载准备 */}
+        {status?.updateAvailable && !catalogReady && !jobActive && (
+          <div className="builtin-update-panel fade-in-soft" key="prepare">
+            <div className="builtin-update-intro">
+              <strong>新数据集已发布</strong>
+              <span className="builtin-status-dim">{latestText}</span>
+            </div>
             <p className="builtin-update-help">{copy.prepareHelp}</p>
-            {jobActive && job ? (
-              <div className="builtin-update-progress-row">
-                <div className="builtin-update-progress" role="progressbar" aria-valuenow={job.progress} aria-valuemin={0} aria-valuemax={100}>
-                  <div className="builtin-update-progress-fill" style={{ width: `${job.progress}%` }} />
-                </div>
-                <div className="builtin-update-progress-meta">
-                  <strong>{job.message}</strong>
-                  <span>{job.progress}%</span>
-                </div>
-                <button className="btn" onClick={() => void cancelJob()}>{copy.cancel}</button>
-              </div>
-            ) : !catalogReady ? (
-              <div className="reference-version-actions">
-                <button className="btn btn-primary" onClick={() => void prepare()}>{copy.prepare}</button>
-              </div>
-            ) : null}
+            <div className="reference-version-actions">
+              <button className="btn btn-primary" onClick={() => void prepare()}>{copy.prepare}</button>
+            </div>
           </div>
         )}
 
+        {/* 下载进度 */}
+        {jobActive && job && (
+          <div className="builtin-update-panel fade-in-soft" key="progress">
+            <div className="builtin-update-progress-row">
+              <div className="builtin-update-progress" role="progressbar" aria-valuenow={job.progress} aria-valuemin={0} aria-valuemax={100}>
+                <div className="builtin-update-progress-fill" style={{ width: `${job.progress}%` }} />
+              </div>
+              <div className="builtin-update-progress-meta">
+                <strong>{job.message}</strong>
+                <span>{job.progress}%</span>
+              </div>
+              <button className="btn" onClick={() => void cancelJob()}>{copy.cancel}</button>
+            </div>
+          </div>
+        )}
+
+        {/* 模型选择 */}
         {catalogReady && status?.catalog && (
-          <div className="reference-version-panel">
-            <div className="reference-version-heading">
+          <div className="builtin-update-panel fade-in-soft" key="catalog">
+            <div className="builtin-catalog-head">
               <strong>选择要更新的模型</strong>
-              <span className="reference-version-meta">
-                {copy.selectHandled}（{status.catalog.qualified}/{status.catalog.total} 合格）。
-              </span>
+              <span className="builtin-status-dim">{status.catalog.qualified}/{status.catalog.total} 个合格 · 仅合格模型可选</span>
             </div>
             <div className="builtin-model-list">
               {status.catalog.models.map((model) => (
@@ -316,7 +354,7 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
                   <span className="builtin-model-name">{model.model}</span>
                   {model.qualified
                     ? <span className="tone-current">合格 · {model.nValid} 有效样本</span>
-                    : <span className="tone-stale">不合格 · 缺 {model.missingCells} cell / 样本不足 {model.belowMinimumCells}</span>}
+                    : <span className="tone-stale">不合格</span>}
                 </label>
               ))}
             </div>
@@ -331,44 +369,29 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
           </div>
         )}
 
-        <div className="reference-overview-header">
-          <div className="reference-overview-copy">
-            <span className="reference-kicker">版本历史与维护</span>
-            <div className="reference-status-detail">
-              <div className="reference-status-badges">
-                <span>{status ? `${status.versions.length} 个版本` : "…"}</span>
-                <span>数据集缓存 {status ? formatBytes(status.cacheBytes) : "…"} / 上限 2 GB</span>
-              </div>
-              {status && status.versions.length > 0 && (
-                <ul className="builtin-version-list">
-                  {[...status.versions].reverse().map((version) => (
-                    <li key={version.file}>
-                      <code>{version.file}</code> · {version.libraryVersion} · {version.modelIds} 个模型 · {formatDate(version.appliedAt)}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </div>
-          <div className="reference-overview-action reference-version-actions">
-            <button className="btn" disabled={rollingBack || !canRollback || jobActive} onClick={() => void rollback()}>
+        {/* 维护行（次要） */}
+        <div className="builtin-meta-row">
+          <span className="builtin-status-dim">
+            {status ? `共 ${status.versions.length} 个版本 · 数据集缓存 ${formatBytes(status.cacheBytes)} / 2 GB` : ""}
+          </span>
+          <div className="reference-version-actions">
+            <button className="btn btn-ghost" disabled={rollingBack || !canRollback || jobActive} onClick={() => void rollback()}>
               {rollingBack ? "回滚中…" : copy.rollback}
             </button>
-            <button className="btn" disabled={cleaning || jobActive} onClick={() => void cleanCache()}>
+            <button className="btn btn-ghost" disabled={cleaning || jobActive} onClick={() => void cleanCache()}>
               {cleaning ? "清理中…" : copy.cleanCache}
             </button>
           </div>
         </div>
 
-        <div className="builtin-proxy-panel">
-          <h3>{copy.proxyTitle}</h3>
+        {/* 代理（折叠） */}
+        <details className="builtin-proxy-details">
+          <summary>
+            {copy.proxyTitle} · {proxyInfo?.configured
+              ? `${proxyInfo.host}${proxyInfo.hasAuth ? "（含认证）" : ""}`
+              : "未配置（直连）"}
+          </summary>
           <p className="builtin-update-help">{copy.proxyHelp}</p>
-          <div className="reference-status-badges">
-            <span className={`tone-${proxyInfo?.configured ? "usable" : "stale"}`}>
-              {proxyInfo?.configured ? copy.proxyConfigured : copy.proxyNotConfigured}
-            </span>
-            {proxyInfo?.host && <span>{proxyInfo.host}{proxyInfo.hasAuth ? ` ${copy.proxyHasAuth}` : ""}</span>}
-          </div>
           <div className="reference-version-actions">
             <input
               className="builtin-proxy-input"
@@ -388,8 +411,8 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
               {proxyTesting ? "测试中…" : copy.proxyTest}
             </button>
           </div>
-          {proxyTest && <div className={`connection-inline ${proxyTest.startsWith(copy.proxyTestOk) ? "is-success" : "is-failed"}`} role="status">{proxyTest}</div>}
-        </div>
+          {proxyTest && <div className={`connection-inline fade-in-soft ${proxyTest.startsWith(copy.proxyTestOk) ? "is-success" : "is-failed"}`} role="status">{proxyTest}</div>}
+        </details>
       </div>
     </section>
   );
