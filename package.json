@@ -1,6 +1,6 @@
 {
   "name": "model-verity",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Local CLI + Web tool to audit non-official AI providers via single-token behavioral fingerprints",
   "type": "module",
   "bin": {
