@@ -37,6 +37,7 @@
   "files": [
     "dist/",
     "docs/",
+    "!docs/images/",
     "第三方声明.md",
     "SECURITY.md"
   ],
