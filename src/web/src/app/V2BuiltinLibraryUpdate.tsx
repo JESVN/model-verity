@@ -378,7 +378,7 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
         {catalogReady && status?.catalog && (
           <div className="builtin-update-panel fade-in-soft" key="catalog">
             <div className="builtin-catalog-head">
-              <strong>选择要更新为内置的模型</strong>
+              <strong>选择要应用的模型</strong>
               <span className="builtin-status-dim">{status.catalog.qualified}/{status.catalog.total} 个合格 · 仅合格模型可选</span>
             </div>
             <p className="builtin-update-help">{catalogApplied ? copy.applyCurrent : copy.applyPending}</p>
