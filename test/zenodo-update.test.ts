@@ -343,6 +343,28 @@ test("Zenodo update: transient 504s on the metadata endpoint are retried", async
   }
 });
 
+test("Zenodo update: proxy can be configured, masked, tested, and cleared", async () => {
+  const mock = await startMock();
+  mock.zip = datasetZip(GOOD_MANIFEST, [["openai/gpt-5.6-sol", 12]]);
+  const dir = await mkdtemp(join(tmpdir(), "mv-zenodo-proxy-"));
+  const manager = makeManager(dir, mock);
+  try {
+    assert.deepEqual(manager.proxyInfo(), { configured: false, host: null, hasAuth: false });
+    assert.equal((await manager.testProxy()).ok, true, "direct connectivity should succeed");
+    const info = manager.setProxy("http://user:secret@proxy.example:8080");
+    assert.equal(info.configured, true);
+    assert.equal(info.host, "proxy.example:8080");
+    assert.equal(info.hasAuth, true);
+    assert.ok(!JSON.stringify(info).includes("secret"), "credentials must never leak");
+    assert.deepEqual(manager.setProxy(null), { configured: false, host: null, hasAuth: false });
+    assert.throws(() => manager.setProxy("not a url"), /格式无效/);
+    assert.throws(() => manager.setProxy("ftp://proxy.example:8080"), /http 或 https/);
+  } finally {
+    await (mock as any).closeMock();
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
 test("Zenodo update: apply requires a prepared catalog and at least one model", async () => {
   const mock = await startMock();
   mock.zip = datasetZip(GOOD_MANIFEST, [["openai/gpt-5.6-sol", 12]]);

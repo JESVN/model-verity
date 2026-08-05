@@ -94,6 +94,19 @@ export const BUILTIN_UPDATE_COPY = {
   noneQualified: "没有可用模型",
   noHistory: "无回滚可用",
   lastErrorTitle: "最近一次检查出错",
+  proxyTitle: "Zenodo 代理",
+  proxyHelp: "直连 Zenodo 过慢或不通时，可配置一个能访问 Zenodo 的 HTTP(S) 代理。代理地址（可含 用户名:密码）只保存在服务器本地，界面只显示主机名，不会显示密码。网页配置优先，未配置时回退到环境变量 `MODEL_VERITY_ZENODO_PROXY`。",
+  proxySet: "启用代理",
+  proxyClear: "清除代理",
+  proxyTest: "测试代理",
+  proxyConfigured: "已配置",
+  proxyNotConfigured: "未配置（直连）",
+  proxyHasAuth: "（含代理认证凭据）",
+  proxyTestOk: "代理可访问 Zenodo",
+  proxyTestFail: "代理测试失败",
+  proxyPlaceholder: "http://用户名:密码@主机:端口",
+  proxyUpdated: "代理设置已保存，后续 Zenodo 请求将走代理。",
+  proxyCleared: "代理已清除，恢复直连。",
 };
 
 export function apiErrorMessage(value:string):string {

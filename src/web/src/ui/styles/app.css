@@ -2789,3 +2789,6 @@
 .builtin-update-progress-fill { height:100%; background:var(--accent); border-radius:99px; transition:width .25s var(--ease-out); }
 .builtin-update-progress-meta { display:flex; flex-direction:column; gap:2px; min-width:0; font-size:12px; color:var(--text-secondary); }
 .builtin-update-progress-meta strong { font-weight:500; color:var(--text); }
+.builtin-proxy-panel { margin-top:14px; padding:14px; border:1px solid var(--border-strong); border-radius:12px; }
+.builtin-proxy-panel h3 { margin:0 0 6px; font-size:15px; }
+.builtin-proxy-input { flex:1 1 240px; min-width:200px; padding:8px 10px; font-family:var(--font-mono); font-size:13px; color:var(--text); background:var(--bg-elevated); border:1px solid var(--border-strong); border-radius:8px; }

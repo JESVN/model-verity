@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { api, type ApiZenodoUpdateStatus } from "./api";
+import { api, type ApiZenodoProxyInfo, type ApiZenodoProxyTestResult, type ApiZenodoUpdateStatus } from "./api";
 import { BUILTIN_UPDATE_COPY as copy, apiErrorMessage } from "./terminology";
 
 function formatBytes(value: number): string {
@@ -28,12 +28,17 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
   const [applying, setApplying] = useState(false);
   const [rollingBack, setRollingBack] = useState(false);
   const [cleaning, setCleaning] = useState(false);
+  const [proxyInfo, setProxyInfo] = useState<ApiZenodoProxyInfo | null>(null);
+  const [proxyInput, setProxyInput] = useState("");
+  const [proxyTesting, setProxyTesting] = useState(false);
+  const [proxyTest, setProxyTest] = useState("");
   const timer = useRef<number | null>(null);
 
   const load = async (silent = false) => {
     if (!silent) setLoading(true);
     try {
       setStatus(await api.builtinLibraryUpdateStatus());
+      setProxyInfo(await api.builtinLibraryProxyInfo());
       setError("");
     } catch (value) {
       setError(apiErrorMessage(value instanceof Error ? value.message : String(value)));
@@ -158,6 +163,46 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
       setNotice("已取消数据集下载。");
     } catch (value) {
       setError(apiErrorMessage(value instanceof Error ? value.message : String(value)));
+    }
+  };
+
+  const saveProxy = async () => {
+    setError("");
+    setProxyTest("");
+    try {
+      const next = await api.builtinLibrarySetProxy(proxyInput.trim() || null);
+      setProxyInfo(next);
+      setProxyInput("");
+      setNotice(copy.proxyUpdated);
+    } catch (value) {
+      setError(apiErrorMessage(value instanceof Error ? value.message : String(value)));
+    }
+  };
+
+  const clearProxy = async () => {
+    setError("");
+    setProxyTest("");
+    try {
+      const next = await api.builtinLibrarySetProxy(null);
+      setProxyInfo(next);
+      setNotice(copy.proxyCleared);
+    } catch (value) {
+      setError(apiErrorMessage(value instanceof Error ? value.message : String(value)));
+    }
+  };
+
+  const testProxy = async () => {
+    setProxyTesting(true);
+    setProxyTest("");
+    try {
+      const result: ApiZenodoProxyTestResult = await api.builtinLibraryTestProxy();
+      setProxyTest(result.ok
+        ? `${copy.proxyTestOk}（${result.latencyMs}ms）`
+        : `${copy.proxyTestFail}：${result.error ?? "不可达"}`);
+    } catch (value) {
+      setProxyTest(`${copy.proxyTestFail}：${apiErrorMessage(value instanceof Error ? value.message : String(value))}`);
+    } finally {
+      setProxyTesting(false);
     }
   };
 
@@ -313,6 +358,37 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
               {cleaning ? "清理中…" : copy.cleanCache}
             </button>
           </div>
+        </div>
+
+        <div className="builtin-proxy-panel">
+          <h3>{copy.proxyTitle}</h3>
+          <p className="builtin-update-help">{copy.proxyHelp}</p>
+          <div className="reference-status-badges">
+            <span className={`tone-${proxyInfo?.configured ? "usable" : "stale"}`}>
+              {proxyInfo?.configured ? copy.proxyConfigured : copy.proxyNotConfigured}
+            </span>
+            {proxyInfo?.host && <span>{proxyInfo.host}{proxyInfo.hasAuth ? ` ${copy.proxyHasAuth}` : ""}</span>}
+          </div>
+          <div className="reference-version-actions">
+            <input
+              className="builtin-proxy-input"
+              type="text"
+              value={proxyInput}
+              placeholder={copy.proxyPlaceholder}
+              onChange={(event) => setProxyInput(event.target.value)}
+              spellCheck={false}
+            />
+            <button className="btn btn-primary" onClick={() => void saveProxy()} disabled={!proxyInput.trim()}>
+              {copy.proxySet}
+            </button>
+            <button className="btn" onClick={() => void clearProxy()} disabled={!proxyInfo?.configured}>
+              {copy.proxyClear}
+            </button>
+            <button className="btn" onClick={() => void testProxy()} disabled={proxyTesting}>
+              {proxyTesting ? "测试中…" : copy.proxyTest}
+            </button>
+          </div>
+          {proxyTest && <div className={`connection-inline ${proxyTest.startsWith(copy.proxyTestOk) ? "is-success" : "is-failed"}`} role="status">{proxyTest}</div>}
         </div>
       </div>
     </section>

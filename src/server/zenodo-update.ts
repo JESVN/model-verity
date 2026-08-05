@@ -129,7 +129,19 @@ export interface ZenodoUpdateOptions {
   hostCheck?: (rawUrl: string) => Promise<void>;
 }
 
-type FetchInit = RequestInit & { dispatcher?: ProxyAgent };
+export interface ZenodoProxyInfo {
+  configured: boolean;
+  host: string | null;
+  hasAuth: boolean;
+}
+
+export interface ZenodoProxyTestResult {
+  ok: boolean;
+  error?: string;
+  latencyMs?: number;
+}
+
+type FetchInit = RequestInit;
 
 export class ZenodoUpdateManager {
   private readonly dir: string;
@@ -137,9 +149,10 @@ export class ZenodoUpdateManager {
   private readonly stateFile: string;
   private readonly indexFile: string;
   private readonly fetchImpl: typeof fetch;
-  private readonly proxyAgent: ProxyAgent | null;
-  private readonly agent: Agent;
   private readonly hostCheck: (rawUrl: string) => Promise<void>;
+  private readonly agent: Agent;
+  private currentProxyUrl: string | null = null;
+  private currentProxyAgent: ProxyAgent | null = null;
   private job: ZenodoUpdateJob | null = null;
   private controller: AbortController | null = null;
 
@@ -150,8 +163,6 @@ export class ZenodoUpdateManager {
     this.indexFile = join(this.dir, "library-index.json");
     this.fetchImpl = options.fetchImpl ?? fetch;
     this.hostCheck = options.hostCheck ?? ((rawUrl) => this.assertPublicHost(rawUrl));
-    const proxyUrl = process.env.MODEL_VERITY_ZENODO_PROXY?.trim();
-    this.proxyAgent = proxyUrl ? new ProxyAgent(proxyUrl) : null;
     // Direct mode uses a dedicated agent with generous timeouts: large dataset
     // downloads from slow cross-border links routinely exceed undici's 300s default bodyTimeout.
     this.agent = new Agent({ headersTimeout: 120_000, bodyTimeout: 0, connectTimeout: 30_000 });
@@ -201,7 +212,7 @@ export class ZenodoUpdateManager {
     let url = rawUrl;
     for (let hop = 0; hop < 4; hop += 1) {
       await this.hostCheck(url);
-      const response = await this.fetchImpl(url, { ...init, redirect: "manual", ...(this.proxyAgent ? { dispatcher: this.proxyAgent } : { dispatcher: this.agent }) } as unknown as RequestInit);
+      const response = await this.fetchImpl(url, { ...init, redirect: "manual", dispatcher: this.dispatcher() } as unknown as RequestInit);
       const location = response.headers.get("location");
       if (response.status >= 300 && response.status < 400 && location) {
         await response.body?.cancel?.().catch(() => undefined);
@@ -448,6 +459,73 @@ export class ZenodoUpdateManager {
 
   jobFor(id: string): ZenodoUpdateJob | null {
     return this.job && this.job.id === id ? { ...this.job } : null;
+  }
+
+  // ---------- proxy configuration ----------
+
+  private proxyFile(): string {
+    return join(this.dir, "zenodo.proxy.json");
+  }
+
+  private readProxyConfig(): { url: string; updatedAt?: string } | null {
+    try { return JSON.parse(readFileSync(this.proxyFile(), "utf8")) as { url: string; updatedAt?: string }; } catch { return null; }
+  }
+
+  /** Effective proxy URL: the UI-set value wins, environment variable is the fallback. */
+  private proxyUrl(): string | null {
+    const stored = this.readProxyConfig()?.url?.trim();
+    return stored || process.env.MODEL_VERITY_ZENODO_PROXY?.trim() || null;
+  }
+
+  private dispatcher(): Agent | ProxyAgent {
+    const url = this.proxyUrl();
+    if (!url) return this.agent;
+    if (url !== this.currentProxyUrl || !this.currentProxyAgent) {
+      try { this.currentProxyAgent?.close?.().catch?.(() => undefined); } catch { /* ignore */ }
+      this.currentProxyAgent = new ProxyAgent(url);
+      this.currentProxyUrl = url;
+    }
+    return this.currentProxyAgent;
+  }
+
+  /** Redacted for API responses: never reveal credentials or the full URL. */
+  proxyInfo(): ZenodoProxyInfo {
+    const url = this.proxyUrl();
+    if (!url) return { configured: false, host: null, hasAuth: false };
+    try {
+      const parsed = new URL(url);
+      return { configured: true, host: parsed.host, hasAuth: Boolean(parsed.username) };
+    } catch {
+      return { configured: true, host: null, hasAuth: false };
+    }
+  }
+
+  setProxy(raw: string | null): ZenodoProxyInfo {
+    if (!raw || !raw.trim()) {
+      rmSync(this.proxyFile(), { force: true });
+      this.currentProxyUrl = null;
+      this.currentProxyAgent = null;
+      return { configured: false, host: null, hasAuth: false };
+    }
+    let parsed: URL;
+    try { parsed = new URL(raw.trim()); } catch { throw new ZenodoUpdateError(400, "代理地址格式无效"); }
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") throw new ZenodoUpdateError(400, "代理必须使用 http 或 https");
+    if (parsed.hash) throw new ZenodoUpdateError(400, "代理地址不能包含 fragment");
+    mkdirSync(this.dir, { recursive: true, mode: 0o700 });
+    writeFileSync(this.proxyFile(), JSON.stringify({ url: raw.trim(), updatedAt: new Date().toISOString() }), { mode: 0o600 });
+    this.currentProxyUrl = null;
+    this.currentProxyAgent = null;
+    return this.proxyInfo();
+  }
+
+  async testProxy(): Promise<ZenodoProxyTestResult> {
+    const started = Date.now();
+    try {
+      await this.fetchJson(`${ZENODO_API_BASE}/${ZENODO_CONCEPT_ID}`);
+      return { ok: true, latencyMs: Date.now() - started };
+    } catch (error) {
+      return { ok: false, error: error instanceof Error ? error.message : String(error) };
+    }
   }
 
   private setJob(patch: Partial<ZenodoUpdateJob>): void {

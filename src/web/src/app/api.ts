@@ -103,6 +103,9 @@ export interface ApiZenodoUpdateJob {
 
 export interface ApiZenodoCatalogModel { model: string; qualified: boolean; nValid: number; missingCells: number; belowMinimumCells: number }
 
+export interface ApiZenodoProxyInfo { configured: boolean; host: string | null; hasAuth: boolean }
+export interface ApiZenodoProxyTestResult { ok: boolean; error?: string; latencyMs?: number }
+
 export interface ApiZenodoUpdateStatus {
   current: { libraryVersion: string; models: number; collectedAt: string; source: "bundled" | "runtime"; recordId?: string };
   latest: { recordId: string; version?: string; updated: string } | null;
@@ -202,4 +205,7 @@ export const api = {
   builtinLibraryUpdateApply: (modelIds: string[]) => request<ApiZenodoUpdateStatus>("/api/v2/references/update", { method: "POST", body: JSON.stringify({ modelIds }) }),
   builtinLibraryUpdateRollback: () => request<ApiZenodoUpdateStatus>("/api/v2/references/update/rollback", { method: "POST", body: "{}" }),
   builtinLibraryUpdateCleanCache: () => request<{ ok: boolean; freedBytes: number }>("/api/v2/references/update/cache/clean", { method: "POST", body: "{}" }),
+  builtinLibraryProxyInfo: () => request<ApiZenodoProxyInfo>("/api/v2/references/update/proxy"),
+  builtinLibrarySetProxy: (url: string | null) => request<ApiZenodoProxyInfo>("/api/v2/references/update/proxy", { method: "POST", body: JSON.stringify({ url: url ?? "" }) }),
+  builtinLibraryTestProxy: () => request<ApiZenodoProxyTestResult>("/api/v2/references/update/proxy/test", { method: "POST", body: "{}" }),
 };
