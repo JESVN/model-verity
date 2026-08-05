@@ -46,6 +46,7 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
   const [notice, setNotice] = useState("");
   const [checking, setChecking] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [query, setQuery] = useState("");
   const [applying, setApplying] = useState(false);
   const [rollingBack, setRollingBack] = useState(false);
   const [cleaning, setCleaning] = useState(false);
@@ -236,6 +237,11 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
     });
   };
 
+  const catalogModels = status?.catalog.models ?? [];
+  const trimmedQuery = query.trim().toLowerCase();
+  const filteredModels = trimmedQuery
+    ? catalogModels.filter((model) => model.model.toLowerCase().includes(trimmedQuery))
+    : catalogModels;
   const job = status?.prepareJob;
   const jobActive = Boolean(job && (job.status === "queued" || job.status === "running"));
   const catalogReady = Boolean(status?.catalog.ready && status.catalog.models.length);
@@ -342,8 +348,16 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
               <strong>选择要更新的模型</strong>
               <span className="builtin-status-dim">{status.catalog.qualified}/{status.catalog.total} 个合格 · 仅合格模型可选</span>
             </div>
+            <input
+              className="builtin-search-input"
+              type="text"
+              value={query}
+              placeholder="搜索模型，如 gpt、claude、qwen"
+              onChange={(event) => setQuery(event.target.value)}
+              spellCheck={false}
+            />
             <div className="builtin-model-list">
-              {status.catalog.models.map((model) => (
+              {filteredModels.map((model) => (
                 <label key={model.model} className={`builtin-model-row ${model.qualified ? "" : "is-disabled"}`}>
                   <input
                     type="checkbox"
@@ -357,14 +371,22 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
                     : <span className="tone-stale">不合格</span>}
                 </label>
               ))}
+              {trimmedQuery && filteredModels.length === 0 && (
+                <div className="builtin-status-dim builtin-empty-hint">没有匹配“{query.trim()}”的模型</div>
+              )}
             </div>
-            <div className="reference-version-actions">
-              <button className="btn" disabled={applying || !selected.size} onClick={selectAllQualified}>
-                全选合格模型
-              </button>
-              <button className="btn btn-primary" disabled={applying || !selected.size} onClick={() => void applySelected()}>
-                {applying ? "更新中…" : `${copy.apply}（${selected.size}）`}
-              </button>
+            <div className="builtin-list-footer">
+              <span className="builtin-status-dim">
+                {trimmedQuery ? `${filteredModels.length} 个匹配` : `${catalogModels.length} 个模型`}
+              </span>
+              <div className="reference-version-actions">
+                <button className="btn" disabled={applying || !selected.size} onClick={selectAllQualified}>
+                  全选合格模型
+                </button>
+                <button className="btn btn-primary" disabled={applying || !selected.size} onClick={() => void applySelected()}>
+                  {applying ? "更新中…" : `${copy.apply}（${selected.size}）`}
+                </button>
+              </div>
             </div>
           </div>
         )}
