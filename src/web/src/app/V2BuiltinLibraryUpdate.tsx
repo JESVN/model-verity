@@ -131,7 +131,7 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
       const next = await api.builtinLibraryUpdateApply(modelIds);
       setStatus(next);
       setSelected(new Set());
-      setNotice(`已更新 ${modelIds.length} 个模型。`);
+      setNotice(`已更新为内置参考（${modelIds.length} 个模型）。`);
       onLibraryChanged?.();
     } catch (value) {
       setError(apiErrorMessage(value instanceof Error ? value.message : String(value)));
@@ -245,6 +245,7 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
     ? catalogModels.filter((model) => model.model.toLowerCase().includes(trimmedQuery))
     : catalogModels;
   const visibleModels = filteredModels.filter((model) => showUnqualified || model.qualified);
+  const catalogApplied = Boolean(status?.catalog.recordId && status.current.recordId === status.catalog.recordId);
   const job = status?.prepareJob;
   const jobActive = Boolean(job && (job.status === "queued" || job.status === "running"));
   const catalogReady = Boolean(status?.catalog.ready && status.catalog.models.length);
@@ -324,7 +325,7 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
         {status?.updateAvailable && !catalogReady && !jobActive && (
           <div className="builtin-update-panel is-new fade-in-soft" key="prepare">
             <div className="builtin-update-intro">
-              <strong>新数据集已发布</strong>
+              <strong>发现新版本数据</strong>
               <span className="builtin-status-dim">{latestText}</span>
             </div>
             <p className="builtin-update-help">{copy.prepareHelp}</p>
@@ -354,9 +355,10 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
         {catalogReady && status?.catalog && (
           <div className="builtin-update-panel fade-in-soft" key="catalog">
             <div className="builtin-catalog-head">
-              <strong>选择要更新的模型</strong>
+              <strong>选择要更新为内置的模型</strong>
               <span className="builtin-status-dim">{status.catalog.qualified}/{status.catalog.total} 个合格 · 仅合格模型可选</span>
             </div>
+            <p className="builtin-update-help">{catalogApplied ? copy.applyCurrent : copy.applyPending}</p>
             <input
               className="builtin-search-input"
               type="text"
