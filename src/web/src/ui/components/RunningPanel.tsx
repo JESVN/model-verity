@@ -4,10 +4,12 @@ import { ProgressRing } from "./ProgressRing";
 
 export interface RunningPanelProps {
   data: RunningView;
+  syncMessage?: string;
+  onRefresh?: () => void;
   onCancel?: () => void;
 }
 
-export function RunningPanel({ data, onCancel }: RunningPanelProps) {
+export function RunningPanel({ data, syncMessage, onRefresh, onCancel }: RunningPanelProps) {
   const pctWidth = `${Math.round(Math.min(1, Math.max(0, data.progress)) * 100)}%`;
 
   return (
@@ -28,6 +30,12 @@ export function RunningPanel({ data, onCancel }: RunningPanelProps) {
           <span>成功 {data.successCount}</span>
           <span>失败 {data.failCount}</span>
         </div>
+        {syncMessage ? (
+          <div className="run-sync-notice" role="status">
+            <span>{syncMessage}</span>
+            <button type="button" className="btn btn-ghost" onClick={() => onRefresh?.()}>立即刷新</button>
+          </div>
+        ) : null}
         <button type="button" className="btn btn-secondary" onClick={() => onCancel?.()}>
           取消
         </button>

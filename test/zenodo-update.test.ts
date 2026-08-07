@@ -202,6 +202,18 @@ async function waitJob(manager: ZenodoUpdateManager): Promise<ZenodoUpdateStatus
   throw new Error("prepare job did not finish");
 }
 
+async function waitApplyJob(manager: ZenodoUpdateManager): Promise<{ status: ZenodoUpdateStatus; sawProgress: boolean }> {
+  let sawProgress = false;
+  for (let i = 0; i < 300; i += 1) {
+    const status = manager.status();
+    const job = status.applyJob;
+    if (job && job.progress > 0 && job.progress < 100) sawProgress = true;
+    if (job && (job.status === "done" || job.status === "failed")) return { status, sawProgress };
+    await new Promise((resolve) => setTimeout(resolve, 5));
+  }
+  throw new Error("apply job did not finish");
+}
+
 test("Zenodo update: check -> prepare -> apply selected -> rollback -> clean cache", async () => {
   const mock = await startMock();
   mock.zip = datasetZip(GOOD_MANIFEST, [["openai/gpt-5.6-sol", 12], ["anthropic/claude-opus-5", 12]]);
@@ -232,29 +244,54 @@ test("Zenodo update: check -> prepare -> apply selected -> rollback -> clean cac
     assert.equal(prepared.catalog.qualified, 2);
     assert.ok(prepared.cacheBytes > 0);
 
-    // apply the selected models (whole-library replacement with new snapshots)
-    const applied = manager.updateFromCatalog(["openai/gpt-5.6-sol", "anthropic/claude-opus-5"]);
-    assert.equal(applied.current.source, "runtime");
-    assert.equal(applied.current.models, 2);
-    assert.equal(applied.versions.length, 1);
-    assert.ok(applied.current.modelIds.includes("openai/gpt-5.6-sol"));
+    // Applying is asynchronous, reports real progress, and preserves unselected built-ins.
+    const firstJob = manager.startApply(["openai/gpt-5.6-sol"], "download");
+    assert.equal(firstJob.kind, "apply");
+    assert.equal(firstJob.action, "download");
+    const firstResult = await waitApplyJob(manager);
+    assert.equal(firstResult.status.applyJob?.status, "done", firstResult.status.applyJob?.error ?? "apply failed");
+    assert.equal(firstResult.sawProgress, true);
+    assert.equal(firstResult.status.current.source, "runtime");
+    assert.equal(firstResult.status.current.models, 34);
+    assert.equal(firstResult.status.current.revision, 1);
+    assert.equal(firstResult.status.current.libraryVersion, "pamela-zenodo-main-03@1");
+    assert.equal(firstResult.status.current.collectedAt, GOOD_MANIFEST.created_utc, "collection date comes from the dataset, not its download or publish time");
+    assert.ok(firstResult.status.current.appliedAt);
+    assert.equal(firstResult.status.versions.length, 1);
+    assert.deepEqual(firstResult.status.catalog.appliedModelIds, ["openai/gpt-5.6-sol"]);
+    assert.equal(firstResult.status.updateAvailable, true, "the other catalog model remains pending");
 
-    // runtime overlay becomes visible through the built-in library API
+    // Runtime overlay exposes both preserved and newly downloaded references with per-model provenance.
     configureLibraryOverlay(join(dir, "builtin-library"));
     const refs = listBuiltinReferences();
-    assert.equal(refs.length, 2);
-    assert.equal(refs[0].id, "builtin:pamela:anthropic/claude-opus-5");
+    assert.equal(refs.length, 34);
+    assert.ok(refs.some((reference) => reference.id === "builtin:pamela:openai/gpt-5.6-sol"));
+    const preservedBundled = getBuiltinReference("builtin:pamela:openai/gpt-5.4-mini");
+    assert.equal(preservedBundled?.libraryRevision, 0);
+    assert.equal(preservedBundled?.libraryAppliedAt, undefined, "an unselected bundled sample must not inherit the new model's update date");
     const full = getBuiltinReference("builtin:pamela:openai/gpt-5.6-sol");
     assert.equal(Object.keys(full!.fingerprint.cells).length, 40);
     assert.ok(Object.values(full!.fingerprint.cells).every((cell) => cell.nValid >= 10));
+    assert.equal(full?.libraryRevision, 1);
+    assert.equal(full?.libraryVersion, "pamela-zenodo-main-03@1");
+    assert.equal(full?.datasetRecordId, "900001");
+    assert.ok(full?.libraryAppliedAt);
 
-    // direct replacement: applying one model replaces the whole library, rollback restores
-    const replaced = manager.updateFromCatalog(["openai/gpt-5.6-sol"]);
-    assert.equal(replaced.current.models, 1);
-    assert.equal(replaced.versions.length, 2);
+    // A second independent action adds its model without dropping the first; rollback restores pending state.
+    manager.startApply(["anthropic/claude-opus-5"], "download");
+    const secondResult = await waitApplyJob(manager);
+    assert.equal(secondResult.status.current.models, 35);
+    assert.equal(secondResult.status.current.revision, 2);
+    assert.equal(secondResult.status.current.libraryVersion, "pamela-zenodo-main-03@2");
+    assert.equal(secondResult.status.versions.length, 2);
+    assert.equal(getBuiltinReference("builtin:pamela:openai/gpt-5.6-sol")?.libraryRevision, 1, "preserved model keeps its original library revision");
+    assert.equal(getBuiltinReference("builtin:pamela:anthropic/claude-opus-5")?.libraryRevision, 2);
+    assert.deepEqual(secondResult.status.catalog.appliedModelIds.sort(), ["anthropic/claude-opus-5", "openai/gpt-5.6-sol"]);
+    assert.equal(secondResult.status.updateAvailable, false);
     const rolledBack = manager.rollback();
-    assert.equal(rolledBack.current.models, 2);
-    assert.equal(rolledBack.versions.length, 2);
+    assert.equal(rolledBack.current.models, 34);
+    assert.deepEqual(rolledBack.catalog.appliedModelIds, ["openai/gpt-5.6-sol"]);
+    assert.equal(rolledBack.updateAvailable, true);
 
     // clean cache frees the dataset download
     const cleaned = manager.cleanCache();

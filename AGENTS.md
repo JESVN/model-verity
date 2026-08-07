@@ -6,7 +6,7 @@
 
 当前数据面为 `service-claims@3.0.0`，评分规则为 `pamela-scorecard@3.1.0`。不要恢复旧 Audit/Enrollment、Legacy UI、旧记录派生评分或 `/api/runs` 前端读取。当前导航仅有：验证、供应商、参考样本、历史。
 
-当前生产为 Review #010；旧业务数据已清理，供应商和加密密钥保留。History 详情独立留在“历史”导航。Review #006 已于 2026-08-03 通过此前生产基线人工验收，Review #009 已于 2026-08-04 通过用户生产环境人工验收，Review #010 已于 2026-08-05 通过用户生产环境人工验收（加载/保存性能：SecretStore 密钥缓存去重 scrypt、前端 15s 请求超时、`/api/bootstrap` 单请求首载）；自建参考表单语义去重、参考样本页分区布局、状态颜色与即时切换、验证页参考来源筛选均已部署。主要统计阻塞是缺少独立 calibration；npm 发布仍需单独批准。
+当前生产以 Review #010 为最近人工批准基线；旧业务数据已清理，供应商和加密密钥保留。History 详情独立留在“历史”导航。Review #006 已于 2026-08-03 通过此前生产基线人工验收，Review #009 已于 2026-08-04 通过用户生产环境人工验收，Review #010 已于 2026-08-05 通过用户生产环境人工验收（加载/保存性能：SecretStore 密钥缓存去重 scrypt、前端 15s 请求超时、`/api/bootstrap` 单请求首载）。2026-08-06 已部署内置样本更新/下载的实时进度、结果反馈、失败重试、成功项移除、部分更新保留未选模型、完成态常驻、采集/入库日期拆分与逐模型递增版本显示，等待生产界面人工验收；更新与下载双分区独立搜索已部署，等待生产界面人工验收。主要统计阻塞是缺少独立 calibration；npm 发布仍需单独批准。
 
 ## 不可突破的证据边界
 
@@ -47,7 +47,7 @@ Manifest 当前为 `pamela-challenge@2`，必须保存 `promptMode`：
 - SSRF 默认拒绝私网、loopback、link-local、CGNAT、保留地址和 redirect。本地 mock 才可设置 `MODEL_VERITY_ALLOW_PRIVATE_ENDPOINTS=1`。
 - 删除生产数据、迁移、恢复、降低安全控制或其他不可逆操作：先检查无活跃任务、完整备份、说明影响，再执行。
 - npm 发布与生产部署分开批准；当前 npm 版本 `0.1.0`，不得自动发布。
-- 项目目录当前没有 `.git`；不要声称完成了分支、提交或 working-tree 审计。
+- 项目由 git 管理，origin 为 `git@github.com:JESVN/model-verity.git`，当前分支 `main`；提交和推送只在用户明确要求时执行，推送前检查差异不含密钥、凭据或生产敏感信息。
 
 生产：`https://modelverity.example/`。HTTPS 和 Basic Auth 当前启用；未认证公网请求返回 401，认证用户可调用 API。应用监听 `127.0.0.1:8787`，systemd 服务为 `model-verity`，数据目录 `/var/lib/model-verity/config/model-verity`。使用 `scripts/deploy-production.sh` 部署，它负责维护锁、候选 smoke、备份和回滚门禁。部署后检查 systemd、health/status、资源、API、SQLite integrity 和维护锁。
 

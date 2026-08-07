@@ -249,6 +249,12 @@ function ConnectionTestDialog({ provider, model, protocol, session, onModel, onP
   return <div className="dialog-layer" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}><div className="dialog-card connection-dialog" role="dialog" aria-modal="true" aria-labelledby="connection-title"><h2 id="connection-title">测试供应商连接</h2><p className="dialog-description"><strong>{provider.name}</strong><br />{provider.baseUrl}</p><SelectField label="本次测试协议" value={protocol} disabled={running} onChange={(value) => onProtocol(value as ApiProtocol)} options={PROTOCOL_OPTIONS.map((item)=>[item.value,item.label,item.description])} help={protocolHelp(protocol)} /><div className="field"><label htmlFor="connection-model">模型</label><Select id="connection-model" value={model} disabled={running} searchable searchPlaceholder="搜索已保存模型" options={provider.models.map((value) => ({ value, label: value }))} onChange={onModel} /><p className="field-help">{MODEL_ID_HELP}</p></div><div className="cost-notice">发送一个最小请求；协议不兼容时最多再试 1 次，可能产生少量费用。成功只代表当前可连接，不证明模型身份。回答正文不会保存。</div>{session ? <div className={`connection-result status-${session.status}`} aria-live="polite"><strong>{running ? "正在测试…" : session.result?.message ?? session.status}</strong><dl><div><dt>请求协议</dt><dd>{protocolLabel(session.protocol)}</dd></div>{session.result ? <><div><dt>结果类别</dt><dd>{connectionCategoryLabel(session.result.category)}</dd></div><div><dt>HTTP 状态码</dt><dd>{session.result.httpStatus ?? "—"}</dd></div><div><dt>耗时</dt><dd>{session.result.latencyMs == null ? "—" : `${Math.round(session.result.latencyMs)} ms`}</dd></div><div><dt>服务自报模型 ID</dt><dd>{session.result.responseModel ?? "未返回"}</dd></div>{session.result.retryAfterMs != null ? <div><dt>建议等待时间</dt><dd>{Math.ceil(session.result.retryAfterMs / 1000)} 秒</dd></div> : null}</> : null}</dl><p className="field-help">服务自报的模型 ID 可以被供应商修改，只作为连接诊断信息，不用于确认身份。</p>{session.result?.advice ? <p>{session.result.advice}</p> : null}</div> : null}<div className="dialog-actions"><button className="btn btn-secondary" onClick={onClose}>{running ? "取消测试" : "关闭"}</button><button className="btn btn-primary" disabled={running || !model} onClick={onStart}>{running ? "测试中…" : session ? "重新测试" : "开始测试"}</button></div></div></div>;
 }
 
+function referenceDate(value: string | undefined): string {
+  if (!value) return "未记录";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "未记录" : date.toLocaleDateString("zh-CN");
+}
+
 function ReferenceManager({ providers: _providers, items, onChanged: _onChanged, onV2RunChanged: _onV2RunChanged }: {
   providers: ApiProvider[];
   items: ApiReference[];
@@ -288,7 +294,24 @@ function ReferenceManager({ providers: _providers, items, onChanged: _onChanged,
           <label htmlFor="reference-search">按模型名称筛选</label>
           <input id="reference-search" type="search" value={query} placeholder="例如 gpt-5.5" onChange={(event)=>setQuery(event.target.value)} />
         </div>
-        <div className="list reference-library-list">{shownBuiltin.map((item)=><div className="list-item" key={item.id}><div><div className="list-item-title">{item.modelClaimed}</div><div className="list-item-sub">采集日期：{new Date(item.enrolledAt).toLocaleDateString()} · 时效：{item.freshnessStatus==="current"?"当前有效":item.freshnessStatus==="usable"?"仍可使用":"已过期"} · 有数据的问题组合：{item.cellCoverage}</div></div><span className={`source-badge ${item.sourceType==="self-built-reference"?"tone-local":"tone-builtin"}`}>{item.sourceType==="self-built-reference"?`${item.level??"L2"} 自建参考`:"研究参考"}</span></div>)}</div>
+        <div className="list reference-library-list">
+          {shownBuiltin.map((item) => (
+            <div className="list-item" key={item.id}>
+              <div className="reference-library-item-copy">
+                <div className="list-item-title">{item.modelClaimed}</div>
+                <div className="reference-library-meta">
+                  <span><small>数据采集</small><strong>{referenceDate(item.enrolledAt)}</strong></span>
+                  <span><small>入库更新</small><strong>{referenceDate(item.libraryAppliedAt)}</strong></span>
+                  <span><small>样本版本</small><strong>{item.libraryRevision ? `v${item.libraryRevision}` : item.libraryVersion ?? "未记录"}</strong></span>
+                  <span><small>Zenodo record</small><strong>{item.datasetRecordId ?? "21278557"}</strong></span>
+                  <span><small>时效</small><strong>{item.freshnessStatus === "current" ? "当前有效" : item.freshnessStatus === "usable" ? "仍可使用" : "已过期"}</strong></span>
+                  <span><small>问题组合</small><strong>{item.cellCoverage}</strong></span>
+                </div>
+              </div>
+              <span className="source-badge tone-builtin">研究参考</span>
+            </div>
+          ))}
+        </div>
         {builtin.length?<div className="pagination" aria-label="研究参考分页"><button className="btn btn-ghost" disabled={safePage<=1} onClick={()=>setPage((value)=>Math.max(1,value-1))}>上一页</button><span className="pagination-status">第 {safePage} / {totalPages} 页</span><button className="btn btn-ghost" disabled={safePage>=totalPages} onClick={()=>setPage((value)=>Math.min(totalPages,value+1))}>下一页</button><div className="pagination-size"><span className="caption">每页</span><Select id="reference-page-size" aria-label="每页显示数量" value={String(pageSize)} onChange={(value)=>setPageSize(Number(value))} options={[10,20,50].map((value)=>({value:String(value),label:`${value} 条`}))}/></div></div>:<p className="caption reference-empty">没有匹配的研究参考。</p>}
       </section>
     </div>

@@ -14,6 +14,17 @@ function formatDate(value: string | undefined): string {
   return Number.isNaN(date.getTime()) ? value : date.toLocaleString("zh-CN", { hour12: false });
 }
 
+function pendingCatalogCounts(status: ApiZenodoUpdateStatus) {
+  const current = new Set(status.current.modelIds);
+  const applied = new Set(status.catalog.appliedModelIds);
+  const qualified = status.catalog.models.filter((model) => model.qualified);
+  return {
+    currentQualified: qualified.filter((model) => current.has(model.model)).length,
+    existingPending: qualified.filter((model) => current.has(model.model) && !applied.has(model.model)).length,
+    newPending: qualified.filter((model) => !current.has(model.model) && !applied.has(model.model)).length,
+  };
+}
+
 type Phase = "idle" | "checking" | "error" | "downloading" | "update_available" | "up_to_date" | "catalog";
 
 const PHASE_COPY: Record<Phase, string> = {
@@ -46,9 +57,11 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
   const [notice, setNotice] = useState("");
   const [checking, setChecking] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [query, setQuery] = useState("");
+  const [builtinQuery, setBuiltinQuery] = useState("");
+  const [newQuery, setNewQuery] = useState("");
   const [showUnqualified, setShowUnqualified] = useState(false);
-  const [applying, setApplying] = useState(false);
+  const [checkOutcome, setCheckOutcome] = useState<{ kind: "available" | "latest" | "failed"; message: string } | null>(null);
+  const [applyRequestFailure, setApplyRequestFailure] = useState<{ action: "update" | "download"; modelIds: string[]; error: string } | null>(null);
   const [rollingBack, setRollingBack] = useState(false);
   const [cleaning, setCleaning] = useState(false);
   const [proxyInfo, setProxyInfo] = useState<ApiZenodoProxyInfo | null>(null);
@@ -74,6 +87,7 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
     void load();
     return () => {
       if (timer.current) window.clearInterval(timer.current);
+      timer.current = null;
     };
   }, []);
 
@@ -82,29 +96,72 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
     timer.current = window.setInterval(async () => {
       try {
         const job = await api.builtinLibraryUpdateJob(jobId);
-        setStatus((current) => (current ? { ...current, prepareJob: job } : current));
+        setStatus((current) => current ? {
+          ...current,
+          ...(job.kind === "prepare" ? { prepareJob: job } : { applyJob: job }),
+        } : current);
         if (job.status === "done" || job.status === "failed" || job.status === "canceled") {
           if (timer.current) window.clearInterval(timer.current);
-          if (job.status === "done") { setNotice(copy.prepareDone); await load(true); }
-          else if (job.status === "failed") setError(job.error ?? "数据集准备失败。");
-          else setNotice("已取消数据集下载。");
+          timer.current = null;
+          if (job.kind === "prepare") {
+            if (job.status === "done") { setNotice(copy.prepareDone); await load(true); }
+            else if (job.status === "canceled") setNotice("已取消数据集下载。");
+          } else if (job.status === "done") {
+            setSelected((current) => {
+              const next = new Set(current);
+              for (const modelId of job.modelIds ?? []) next.delete(modelId);
+              return next;
+            });
+            setNotice("");
+            await load(true);
+            onLibraryChanged?.();
+          }
         }
-      } catch {
+      } catch (value) {
         if (timer.current) window.clearInterval(timer.current);
+        timer.current = null;
+        setError(apiErrorMessage(value instanceof Error ? value.message : String(value)));
       }
-    }, 1200);
+    }, 600);
   };
+
+  useEffect(() => {
+    const active = [status?.prepareJob, status?.applyJob].find((job) => job && (job.status === "queued" || job.status === "running"));
+    if (active && !timer.current) pollJob(active.id);
+    // The job id/status pair changes only when polling must start or stop.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status?.prepareJob?.id, status?.prepareJob?.status, status?.applyJob?.id, status?.applyJob?.status]);
 
   const check = async () => {
     setChecking(true);
     setNotice("");
+    setError("");
+    setCheckOutcome(null);
+    setApplyRequestFailure(null);
     try {
       const next = await api.builtinLibraryUpdateCheck(true);
       setStatus(next);
-      setError("");
-      if (next.lastError) setError(next.lastError);
+      if (next.lastError) {
+        setCheckOutcome({ kind: "failed", message: apiErrorMessage(next.lastError) });
+      } else if (!next.catalog.ready && next.updateAvailable) {
+        setCheckOutcome({ kind: "available", message: "发现新的 Zenodo 数据版本，请先下载数据到本地。" });
+      } else {
+        const pending = pendingCatalogCounts(next);
+        if (pending.existingPending > 0) {
+          setCheckOutcome({ kind: "available", message: `发现 ${pending.existingPending} 个现有内置样本可更新。` });
+        } else {
+          setCheckOutcome({
+            kind: "latest",
+            message: pending.newPending > 0
+              ? `现有内置样本已是最新版本；另有 ${pending.newPending} 个新样本可按需下载。`
+              : "当前内置样本已是最新版本，无需更新。",
+          });
+        }
+      }
     } catch (value) {
-      setError(apiErrorMessage(value instanceof Error ? value.message : String(value)));
+      const message = apiErrorMessage(value instanceof Error ? value.message : String(value));
+      setStatus((current) => current ? { ...current, lastError: message } : current);
+      setCheckOutcome({ kind: "failed", message });
     } finally {
       setChecking(false);
     }
@@ -122,21 +179,22 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
     }
   };
 
-  const applySelected = async (modelIds: string[]) => {
+  const applySelected = async (modelIds: string[], action: "update" | "download") => {
     const ids = [...modelIds].sort((a, b) => a.localeCompare(b));
-    if (!ids.length) { setError("请先勾选要更新的模型。"); return; }
-    setApplying(true);
+    if (!ids.length) { setError(action === "update" ? "请先勾选要更新的模型。" : "请先勾选要下载的模型。"); return; }
     setError("");
+    setNotice("");
+    setApplyRequestFailure(null);
     try {
-      const next = await api.builtinLibraryUpdateApply(ids);
-      setStatus(next);
-      setSelected(new Set());
-      setNotice(`已更新为内置参考（${ids.length} 个模型）。`);
-      onLibraryChanged?.();
+      const job = await api.builtinLibraryUpdateApply(ids, action);
+      setStatus((current) => current ? { ...current, applyJob: job } : current);
+      pollJob(job.id);
     } catch (value) {
-      setError(apiErrorMessage(value instanceof Error ? value.message : String(value)));
-    } finally {
-      setApplying(false);
+      setApplyRequestFailure({
+        action,
+        modelIds: ids,
+        error: apiErrorMessage(value instanceof Error ? value.message : String(value)),
+      });
     }
   };
 
@@ -183,6 +241,7 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
     try {
       const next = await api.builtinLibraryUpdateCancelJob(current.id);
       if (timer.current) window.clearInterval(timer.current);
+      timer.current = null;
       setStatus(next);
       setNotice("已取消数据集下载。");
     } catch (value) {
@@ -233,7 +292,7 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
   const selectCurrentBuiltin = () => {
     setSelected((current) => {
       const next = new Set(current);
-      for (const model of builtinModels) next.add(model.model);
+      for (const model of pendingBuiltinModels) next.add(model.model);
       return next;
     });
   };
@@ -249,41 +308,49 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
 
   const catalogModels = status?.catalog.models ?? [];
   const unqualifiedCount = Math.max(0, catalogModels.length - (status?.catalog.qualified ?? 0));
-  const trimmedQuery = query.trim().toLowerCase();
-  const filteredModels = trimmedQuery
-    ? catalogModels.filter((model) => model.model.toLowerCase().includes(trimmedQuery))
-    : catalogModels;
+  const trimmedBuiltinQuery = builtinQuery.trim().toLowerCase();
+  const trimmedNewQuery = newQuery.trim().toLowerCase();
   const currentBuiltinIds = new Set(status?.current.modelIds ?? []);
-  const builtinModels = filteredModels.filter((model) => model.qualified && currentBuiltinIds.has(model.model));
-  const newModels = filteredModels.filter((model) => model.qualified && !currentBuiltinIds.has(model.model));
-  const unqualifiedModels = filteredModels.filter((model) => !model.qualified);
+  const appliedModelIds = new Set(status?.catalog.appliedModelIds ?? []);
+  const currentQualifiedModels = catalogModels.filter((model) => model.qualified && currentBuiltinIds.has(model.model));
+  const pendingBuiltinModels = currentQualifiedModels.filter((model) => !appliedModelIds.has(model.model));
+  const pendingNewModels = catalogModels.filter((model) => model.qualified && !currentBuiltinIds.has(model.model) && !appliedModelIds.has(model.model));
+  const builtinModels = trimmedBuiltinQuery
+    ? pendingBuiltinModels.filter((model) => model.model.toLowerCase().includes(trimmedBuiltinQuery))
+    : pendingBuiltinModels;
+  const newModels = trimmedNewQuery
+    ? pendingNewModels.filter((model) => model.model.toLowerCase().includes(trimmedNewQuery))
+    : pendingNewModels;
+  const unqualifiedModels = catalogModels.filter((model) => !model.qualified);
   const selectedIn = (models: typeof catalogModels) => models.filter((model) => selected.has(model.model)).length;
   const selectedIdsIn = (models: typeof catalogModels) => models.filter((model) => selected.has(model.model)).map((model) => model.model);
-  const catalogApplied = Boolean(status?.catalog.recordId && status.current.recordId === status.catalog.recordId);
   const catalogReady = Boolean(status?.catalog.ready && status.catalog.models.length);
 
-  // Auto-select the current built-in models that are present and qualified in the
-  // downloaded dataset, so “refresh my existing samples” does not need per-model clicks.
+  // Keep the common update path one click away, but never reselect entries already applied from this record.
   useEffect(() => {
-    if (catalogReady && !catalogApplied && selected.size === 0 && builtinModels.length > 0) {
-      selectCurrentBuiltin();
-    }
+    if (catalogReady && selected.size === 0 && builtinModels.length > 0) selectCurrentBuiltin();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [catalogReady, catalogApplied, status?.catalog.recordId, status?.catalog.total]);
-  const job = status?.prepareJob;
-  const jobActive = Boolean(job && (job.status === "queued" || job.status === "running"));
+  }, [catalogReady, status?.catalog.recordId, status?.catalog.total, status?.catalog.appliedModelIds.length]);
+  const prepareJob = status?.prepareJob;
+  const prepareActive = Boolean(prepareJob && (prepareJob.status === "queued" || prepareJob.status === "running"));
+  const applyJob = status?.applyJob;
+  const applyActive = Boolean(applyJob && (applyJob.status === "queued" || applyJob.status === "running"));
+  const operationActive = prepareActive || applyActive;
+  const existingPendingCount = pendingBuiltinModels.length;
+  const newPendingCount = pendingNewModels.length;
+  const currentAppliedCount = currentQualifiedModels.length - existingPendingCount;
   const canRollback = (status?.versions.length ?? 0) > 1;
   const hasChecked = Boolean(status?.latest);
 
   const phase: Phase = checking
     ? "checking"
-    : jobActive
+    : prepareActive
       ? "downloading"
       : status?.lastError
         ? "error"
-        : catalogReady
+        : catalogReady && existingPendingCount > 0
           ? "catalog"
-          : status?.updateAvailable
+          : !catalogReady && status?.updateAvailable
             ? "update_available"
             : hasChecked
               ? "up_to_date"
@@ -292,7 +359,9 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
   const latestText = status?.latest
     ? `${status.latest.version ?? "（未标注版本）"} · 更新 ${formatDate(status.latest.updated)}`
     : "";
-  const currentText = status ? `${status.current.libraryVersion} · ${status.current.models} 模型` : "加载中…";
+  const currentText = status
+    ? `${status.current.revision ? `v${status.current.revision}` : status.current.libraryVersion} · ${status.current.models} 模型`
+    : "加载中…";
   const currentSource = status
     ? `${status.current.source === "runtime" ? "运行时更新" : "打包基线"} · 采集 ${formatDate(status.current.collectedAt)}`
     : "";
@@ -305,13 +374,22 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
             <h2 className="section-title">{copy.title}</h2>
             <p className="builtin-update-subtitle">内置研究参考来自 Zenodo 数据集，发现新版本后可下载并更新。</p>
           </div>
-          <button className="btn btn-primary" disabled={checking || jobActive} onClick={() => void check()}>
-            {checking ? "检查中…" : (hasChecked ? copy.refresh : copy.check)}
+          <button className="btn btn-primary" disabled={checking || operationActive} aria-busy={checking} onClick={() => void check()}>
+            {checking ? <><span className="builtin-loading-grid" aria-hidden="true"><span /><span /><span /><span /></span>检查中…</> : (hasChecked ? copy.refresh : copy.check)}
           </button>
         </div>
 
         {error && <div className="connection-inline is-failed fade-in-soft" role="alert">{error}</div>}
         {notice && <div className="connection-inline is-success fade-in-soft" role="status">{notice}</div>}
+        {checkOutcome && !checking && (
+          <div className={`builtin-operation-feedback is-${checkOutcome.kind} fade-in-soft`} role={checkOutcome.kind === "failed" ? "alert" : "status"}>
+            <div>
+              <strong>{checkOutcome.kind === "available" ? "发现新版本" : checkOutcome.kind === "latest" ? "已是最新版本" : "检查更新失败"}</strong>
+              <span>{checkOutcome.message}</span>
+            </div>
+            {checkOutcome.kind === "failed" && <button className="btn btn-ghost" onClick={() => void check()}>重试检查</button>}
+          </div>
+        )}
 
         {/* 版本状态条：当前 -> 最新 */}
         <div className="builtin-status-strip fade-in-soft" role="status" aria-live="polite">
@@ -344,8 +422,15 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
           </div>
         </div>
 
+        {prepareJob?.status === "failed" && !catalogReady && (
+          <div className="builtin-operation-feedback is-failed fade-in-soft" role="alert">
+            <div><strong>下载数据失败</strong><span>{apiErrorMessage(prepareJob.error ?? "数据集准备失败。")}</span></div>
+            <button className="btn btn-ghost" onClick={() => void prepare()}>重试下载</button>
+          </div>
+        )}
+
         {/* 发现新版本 -> 下载准备 */}
-        {status?.updateAvailable && !catalogReady && !jobActive && (
+        {status?.updateAvailable && !catalogReady && !prepareActive && (
           <div className="builtin-update-panel is-new fade-in-soft" key="prepare">
             <div className="builtin-update-intro">
               <strong>发现新版本数据</strong>
@@ -359,15 +444,16 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
         )}
 
         {/* 下载进度 */}
-        {jobActive && job && (
-          <div className="builtin-update-panel is-downloading fade-in-soft" key="progress">
+        {prepareActive && prepareJob && (
+          <div className="builtin-update-panel is-downloading fade-in-soft" key="progress" aria-busy="true">
             <div className="builtin-update-progress-row">
-              <div className="builtin-update-progress" role="progressbar" aria-valuenow={job.progress} aria-valuemin={0} aria-valuemax={100}>
-                <div className="builtin-update-progress-fill" style={{ width: `${job.progress}%` }} />
+              <span className="builtin-loading-grid is-progress" aria-hidden="true"><span /><span /><span /><span /></span>
+              <div className="builtin-update-progress" role="progressbar" aria-label="数据集下载与准备进度" aria-valuenow={prepareJob.progress} aria-valuemin={0} aria-valuemax={100}>
+                <div className="builtin-update-progress-fill" style={{ width: `${prepareJob.progress}%` }} />
               </div>
               <div className="builtin-update-progress-meta">
-                <strong>{job.message}</strong>
-                <span>{job.progress}%</span>
+                <strong>{prepareJob.message}</strong>
+                <span>{prepareJob.progress}%</span>
               </div>
               <button className="btn" onClick={() => void cancelJob()}>{copy.cancel}</button>
             </div>
@@ -381,63 +467,138 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
               <strong>选择要应用的模型</strong>
               <span className="builtin-status-dim">{status.catalog.qualified}/{status.catalog.total} 个合格 · 仅合格模型可选</span>
             </div>
-            <p className="builtin-update-help">{catalogApplied ? copy.applyCurrent : copy.applyPending}</p>
-            <input
-              className="builtin-search-input"
-              type="text"
-              value={query}
-              placeholder="搜索模型，如 gpt、claude、qwen"
-              onChange={(event) => setQuery(event.target.value)}
-              spellCheck={false}
-            />
-            {builtinModels.length > 0 && (
+            <p className="builtin-update-help">{existingPendingCount + newPendingCount > 0 ? copy.applyPending : "这份数据中可用的样本均已处理；检查到新的 Zenodo 版本后会再次显示。"}</p>
+
+            {applyJob && (
+              <div className={`builtin-operation-feedback is-${applyActive ? "running" : applyJob.status === "done" ? "latest" : "failed"}`} role={applyJob.status === "failed" ? "alert" : "status"} aria-live="polite" aria-busy={applyActive}>
+                {applyActive && <span className="builtin-loading-grid is-progress" aria-hidden="true"><span /><span /><span /><span /></span>}
+                <div>
+                  <strong>{applyActive
+                    ? (applyJob.action === "download" ? "正在下载新样本" : "正在更新内置样本")
+                    : applyJob.status === "done"
+                      ? (applyJob.action === "download" ? "新样本下载成功" : "内置样本更新成功")
+                      : (applyJob.action === "download" ? "新样本下载失败" : "内置样本更新失败")}</strong>
+                  <span>{applyJob.status === "failed" ? apiErrorMessage(applyJob.error ?? "处理失败。") : applyJob.message}</span>
+                </div>
+                {applyActive && (
+                  <div className="builtin-operation-progress">
+                    <div className="builtin-update-progress" role="progressbar" aria-label={applyJob.action === "download" ? "新样本下载进度" : "内置样本更新进度"} aria-valuenow={applyJob.progress} aria-valuemin={0} aria-valuemax={100}>
+                      <div className="builtin-update-progress-fill" style={{ width: `${applyJob.progress}%` }} />
+                    </div>
+                    <strong>{applyJob.progress}%</strong>
+                  </div>
+                )}
+                {applyJob.status === "failed" && <button className="btn btn-ghost" onClick={() => void applySelected(applyJob.modelIds ?? [], applyJob.action ?? "update")}>重试</button>}
+              </div>
+            )}
+            {applyRequestFailure && (
+              <div className="builtin-operation-feedback is-failed" role="alert">
+                <div><strong>{applyRequestFailure.action === "download" ? "新样本下载失败" : "内置样本更新失败"}</strong><span>{applyRequestFailure.error}</span></div>
+                <button className="btn btn-ghost" onClick={() => void applySelected(applyRequestFailure.modelIds, applyRequestFailure.action)}>重试</button>
+              </div>
+            )}
+            {existingPendingCount === 0 && currentQualifiedModels.length > 0 && (
+              <section className="builtin-group is-complete" aria-label="现有内置样本更新状态">
+                <div className="builtin-group-head">
+                  <strong>更新现有内置样本</strong>
+                  <span className="builtin-status-dim">{currentAppliedCount}/{currentQualifiedModels.length} 已更新</span>
+                </div>
+                <input
+                  className="builtin-search-input"
+                  type="search"
+                  value=""
+                  placeholder="当前没有待更新的内置样本"
+                  aria-label="搜索待更新的现有内置样本"
+                  disabled
+                />
+                <div className="builtin-complete-state" role="status">
+                  <span className="builtin-complete-mark" aria-hidden="true">✓</span>
+                  <div>
+                    <strong>现有内置样本已是最新版本</strong>
+                    <p>检查到新的 Zenodo 版本后，可更新的模型会重新显示在这里。</p>
+                    <div className="builtin-complete-meta">
+                      <span>数据采集：{formatDate(status.current.collectedAt)}</span>
+                      <span>入库更新：{formatDate(status.current.appliedAt)}</span>
+                      <span>样本版本：{status.current.revision ? `v${status.current.revision}` : status.current.libraryVersion}</span>
+                      {status.current.recordId ? <span>Zenodo record：{status.current.recordId}</span> : null}
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {pendingBuiltinModels.length > 0 && (
               <section className="builtin-group">
                 <div className="builtin-group-head">
                   <strong>更新现有内置样本</strong>
-                  <span className="builtin-status-dim">{selectedIn(builtinModels)}/{builtinModels.length} 已勾选</span>
-                  <button className="btn btn-ghost" disabled={applying} onClick={() => toggleGroup(builtinModels)}>
-                    {builtinModels.every((model) => selected.has(model.model)) ? "清空" : "全选更新"}
+                  <span className="builtin-status-dim">
+                    {selectedIn(pendingBuiltinModels)}/{pendingBuiltinModels.length} 已勾选
+                    {trimmedBuiltinQuery ? ` · ${builtinModels.length} 个匹配` : ""}
+                  </span>
+                  <button className="btn btn-ghost" disabled={operationActive || builtinModels.length === 0} onClick={() => toggleGroup(builtinModels)}>
+                    {builtinModels.length > 0 && builtinModels.every((model) => selected.has(model.model)) ? "清空匹配" : trimmedBuiltinQuery ? "全选匹配" : "全选更新"}
                   </button>
                 </div>
-                <div className="builtin-model-list">
+                <input
+                  className="builtin-search-input"
+                  type="search"
+                  value={builtinQuery}
+                  placeholder="搜索待更新模型，如 gpt、claude、qwen"
+                  aria-label="搜索待更新的现有内置样本"
+                  onChange={(event) => setBuiltinQuery(event.target.value)}
+                  spellCheck={false}
+                />
+                {builtinModels.length > 0 ? <div className="builtin-model-list">
                   {builtinModels.map((model) => (
                     <label key={model.model} className="builtin-model-row">
-                      <input type="checkbox" checked={selected.has(model.model)} disabled={applying} onChange={() => toggleModel(model.model)} />
+                      <input type="checkbox" checked={selected.has(model.model)} disabled={operationActive} onChange={() => toggleModel(model.model)} />
                       <span className="builtin-model-name">{model.model}</span>
                       <span className="tone-current">合格 · {model.nValid} 有效样本</span>
                     </label>
                   ))}
-                </div>
+                </div> : <div className="builtin-status-dim builtin-empty-hint">没有匹配“{builtinQuery.trim()}”的待更新模型</div>}
                 <div className="builtin-group-actions">
-                  <button className="btn btn-primary" disabled={applying || selectedIn(builtinModels) === 0} onClick={() => void applySelected(selectedIdsIn(builtinModels))}>
-                    {applying ? "处理中…" : `更新内置样本（${selectedIn(builtinModels)}）`}
+                  <button className="btn btn-primary" disabled={operationActive || selectedIn(pendingBuiltinModels) === 0} aria-busy={applyActive && applyJob?.action === "update"} onClick={() => void applySelected(selectedIdsIn(pendingBuiltinModels), "update")}>
+                    {applyActive && applyJob?.action === "update" ? <><span className="builtin-loading-grid" aria-hidden="true"><span /><span /><span /><span /></span>更新中 {applyJob.progress}%</> : `更新内置样本（${selectedIn(pendingBuiltinModels)}）`}
                   </button>
                   <span className="builtin-status-dim">仅替换本区勾选的内置样本指纹，不影响其他模型。</span>
                 </div>
               </section>
             )}
 
-            {newModels.length > 0 && (
+            {pendingNewModels.length > 0 && (
               <section className="builtin-group">
                 <div className="builtin-group-head">
                   <strong>下载新样本（未内置）</strong>
-                  <span className="builtin-status-dim">{selectedIn(newModels)}/{newModels.length} 已勾选</span>
-                  <button className="btn btn-ghost" disabled={applying} onClick={() => toggleGroup(newModels)}>
-                    {newModels.every((model) => selected.has(model.model)) ? "清空" : "全选新增"}
+                  <span className="builtin-status-dim">
+                    {selectedIn(pendingNewModels)}/{pendingNewModels.length} 已勾选
+                    {trimmedNewQuery ? ` · ${newModels.length} 个匹配` : ""}
+                  </span>
+                  <button className="btn btn-ghost" disabled={operationActive || newModels.length === 0} onClick={() => toggleGroup(newModels)}>
+                    {newModels.length > 0 && newModels.every((model) => selected.has(model.model)) ? "清空匹配" : trimmedNewQuery ? "全选匹配" : "全选新增"}
                   </button>
                 </div>
-                <div className="builtin-model-list">
+                <input
+                  className="builtin-search-input"
+                  type="search"
+                  value={newQuery}
+                  placeholder="搜索可下载模型，如 gpt、claude、qwen"
+                  aria-label="搜索未内置的新样本"
+                  onChange={(event) => setNewQuery(event.target.value)}
+                  spellCheck={false}
+                />
+                {newModels.length > 0 ? <div className="builtin-model-list">
                   {newModels.map((model) => (
                     <label key={model.model} className="builtin-model-row">
-                      <input type="checkbox" checked={selected.has(model.model)} disabled={applying} onChange={() => toggleModel(model.model)} />
+                      <input type="checkbox" checked={selected.has(model.model)} disabled={operationActive} onChange={() => toggleModel(model.model)} />
                       <span className="builtin-model-name">{model.model}</span>
                       <span className="tone-usable">合格 · {model.nValid} 有效样本</span>
                     </label>
                   ))}
-                </div>
+                </div> : <div className="builtin-status-dim builtin-empty-hint">没有匹配“{newQuery.trim()}”的可下载模型</div>}
                 <div className="builtin-group-actions">
-                  <button className="btn btn-primary" disabled={applying || selectedIn(newModels) === 0} onClick={() => void applySelected(selectedIdsIn(newModels))}>
-                    {applying ? "处理中…" : `下载新样本（${selectedIn(newModels)}）`}
+                  <button className="btn btn-primary" disabled={operationActive || selectedIn(pendingNewModels) === 0} aria-busy={applyActive && applyJob?.action === "download"} onClick={() => void applySelected(selectedIdsIn(pendingNewModels), "download")}>
+                    {applyActive && applyJob?.action === "download" ? <><span className="builtin-loading-grid" aria-hidden="true"><span /><span /><span /><span /></span>下载中 {applyJob.progress}%</> : `下载新样本（${selectedIn(pendingNewModels)}）`}
                   </button>
                   <span className="builtin-status-dim">下载后同样成为内置参考（同 ID 替换新快照，可回滚）。</span>
                 </div>
@@ -448,7 +609,7 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
               <section className="builtin-group">
                 <div className="builtin-group-head">
                   <strong>不合格（不可应用）</strong>
-                  <span className="builtin-status-dim">{trimmedQuery ? `${unqualifiedModels.length} 个匹配` : `${unqualifiedModels.length} 个`}</span>
+                  <span className="builtin-status-dim">{unqualifiedModels.length} 个</span>
                 </div>
                 <div className="builtin-model-list">
                   {unqualifiedModels.map((model) => (
@@ -461,15 +622,9 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
               </section>
             )}
 
-            {trimmedQuery && builtinModels.length + newModels.length === 0 && (
-              <div className="builtin-status-dim builtin-empty-hint">没有匹配“{query.trim()}”的模型</div>
-            )}
-
             {unqualifiedCount > 0 && (
               <div className="builtin-list-footer">
-                <span className="builtin-status-dim">
-                  {trimmedQuery ? `${builtinModels.length + newModels.length} 个匹配` : `${builtinModels.length + newModels.length} 个合格模型`}
-                </span>
+                <span className="builtin-status-dim">{existingPendingCount + newPendingCount} 个待处理合格模型</span>
                 <button className="btn btn-ghost" onClick={() => setShowUnqualified((current) => !current)}>
                   {showUnqualified ? "收起不合格" : `显示不合格（${unqualifiedCount}）`}
                 </button>
@@ -484,10 +639,10 @@ export function V2BuiltinLibraryUpdate({ onLibraryChanged }: { onLibraryChanged?
             {status ? `共 ${status.versions.length} 个版本 · 数据集缓存 ${formatBytes(status.cacheBytes)} / 2 GB` : ""}
           </span>
           <div className="reference-version-actions">
-            <button className="btn btn-ghost" disabled={rollingBack || !canRollback || jobActive} onClick={() => void rollback()}>
+            <button className="btn btn-ghost" disabled={rollingBack || !canRollback || operationActive} onClick={() => void rollback()}>
               {rollingBack ? "回滚中…" : copy.rollback}
             </button>
-            <button className="btn btn-ghost" disabled={cleaning || jobActive} onClick={() => void cleanCache()}>
+            <button className="btn btn-ghost" disabled={cleaning || operationActive} onClick={() => void cleanCache()}>
               {cleaning ? "清理中…" : copy.cleanCache}
             </button>
           </div>

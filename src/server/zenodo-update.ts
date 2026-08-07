@@ -31,8 +31,8 @@ import { invalidateLibraryCache } from "./builtin-library.js";
  * - check:  query the latest dataset record for the PAMELA concept DOI.
  * - prepare: download the dataset once (capped cache), verify prompt
  *   compatibility, scan normalized.jsonl into a per-model catalog.
- * - update:  apply the user-selected qualified models as a new versioned
- *   runtime library (direct replacement + rollback support).
+ * - update:  merge user-selected qualified models into a new versioned
+ *   runtime library while preserving unselected samples and rollback support.
  *
  * Network is Zenodo-only (SSRF-checked each hop). Proxy is opt-in via
  * MODEL_VERITY_ZENODO_PROXY (default: direct).
@@ -92,17 +92,23 @@ export interface LibraryVersionMeta {
   appliedAt: string;
   zenodo: { recordId: string; version?: string; updated: string };
   modelIds: string[];
+  /** Record provenance per model lets partial updates leave untouched samples unchanged. */
+  appliedRecordIds?: Record<string, string>;
 }
 
 interface LibraryIndex { currentFile: string | null; versions: LibraryVersionMeta[] }
 interface ZenodoState { lastSeen?: { recordId: string; version?: string; updated: string }; lastCheckedAt?: string; lastError?: string }
 
 export type PrepareStage = "download" | "extract" | "scan" | "done";
+export type ApplyStage = "validate" | "build" | "save" | "done";
+export type ApplyAction = "update" | "download";
 export interface ZenodoUpdateJob {
   id: string;
-  kind: "prepare";
+  kind: "prepare" | "apply";
+  action?: ApplyAction;
+  modelIds?: string[];
   status: "queued" | "running" | "done" | "failed" | "canceled";
-  stage: PrepareStage;
+  stage: PrepareStage | ApplyStage;
   progress: number; // 0..100
   message: string;
   error?: string;
@@ -111,11 +117,12 @@ export interface ZenodoUpdateJob {
 }
 
 export interface ZenodoUpdateStatus {
-  current: { libraryVersion: string; models: number; collectedAt: string; source: "bundled" | "runtime"; recordId?: string; modelIds: string[] };
+  current: { libraryVersion: string; models: number; collectedAt: string; source: "bundled" | "runtime"; recordId?: string; modelIds: string[]; appliedAt?: string; revision?: number };
   latest: { recordId: string; version?: string; updated: string } | null;
   updateAvailable: boolean;
-  catalog: { recordId?: string; ready: boolean; builtAt?: string; models: CatalogModelInfo[]; total: number; qualified: number };
+  catalog: { recordId?: string; ready: boolean; builtAt?: string; models: CatalogModelInfo[]; total: number; qualified: number; appliedModelIds: string[] };
   prepareJob: ZenodoUpdateJob | null;
+  applyJob: ZenodoUpdateJob | null;
   checkedAt?: string;
   lastError?: string;
   cacheBytes: number;
@@ -342,6 +349,7 @@ export class ZenodoUpdateManager {
   }
 
   async check(refresh: boolean): Promise<ZenodoUpdateStatus> {
+    if (this.job && ["done", "failed", "canceled"].includes(this.job.status)) this.job = null;
     const now = Date.now();
     const state = this.state();
     if (!refresh && state.lastCheckedAt && now - Date.parse(state.lastCheckedAt) < CHECK_MIN_INTERVAL_MS) {
@@ -368,15 +376,22 @@ export class ZenodoUpdateManager {
     const currentMeta = this.currentLibrarySummary();
     const latest = state.lastSeen ? { recordId: state.lastSeen.recordId, version: state.lastSeen.version, updated: state.lastSeen.updated } : null;
     const catalog = state.lastSeen ? this.catalogSummary(state.lastSeen.recordId) : { ready: false, models: [], total: 0, qualified: 0 };
-    const updateAvailable = Boolean(
-      state.lastSeen && (runtime ? runtime.zenodo.recordId !== state.lastSeen.recordId : true),
-    );
+    const appliedModelIds = state.lastSeen && runtime
+      ? this.appliedModelIds(runtime, state.lastSeen.recordId)
+      : [];
+    const applied = new Set(appliedModelIds);
+    const updateAvailable = Boolean(state.lastSeen && (
+      catalog.ready
+        ? catalog.models.some((model) => model.qualified && !applied.has(model.model))
+        : runtime?.zenodo.recordId !== state.lastSeen.recordId
+    ));
     return {
       current: currentMeta,
       latest,
       updateAvailable,
-      catalog: { ...catalog, recordId: state.lastSeen?.recordId },
-      prepareJob: this.job ? { ...this.job } : null,
+      catalog: { ...catalog, recordId: state.lastSeen?.recordId, appliedModelIds },
+      prepareJob: this.job?.kind === "prepare" ? { ...this.job } : null,
+      applyJob: this.job?.kind === "apply" ? { ...this.job, modelIds: [...(this.job.modelIds ?? [])] } : null,
       checkedAt: state.lastCheckedAt,
       lastError: state.lastError,
       cacheBytes: this.cacheBytes(),
@@ -392,10 +407,12 @@ export class ZenodoUpdateManager {
       return {
         libraryVersion: runtime.libraryVersion,
         models: library ? library.models.length : 0,
-        collectedAt: runtime.zenodo.updated,
+        collectedAt: library?.source.collectedAt ?? runtime.zenodo.updated,
         source: "runtime",
         recordId: runtime.zenodo.recordId,
         modelIds: library ? library.models.map((model) => model.model) : [],
+        appliedAt: runtime.appliedAt,
+        revision: Number(runtime.file.match(/library-v(\d+)/)?.[1] ?? 1),
       };
     }
     try {
@@ -410,6 +427,28 @@ export class ZenodoUpdateManager {
       };
     } catch {
       return { libraryVersion: "unknown", models: 0, collectedAt: "", source: "bundled", modelIds: [] };
+    }
+  }
+
+  private appliedModelIds(version: LibraryVersionMeta, recordId: string): string[] {
+    if (version.appliedRecordIds) {
+      return Object.entries(version.appliedRecordIds)
+        .filter(([, appliedRecordId]) => appliedRecordId === recordId)
+        .map(([modelId]) => modelId);
+    }
+    // Runtime versions created before per-model provenance applied every listed model from one record.
+    return version.zenodo.recordId === recordId ? [...version.modelIds] : [];
+  }
+
+  private currentLibraryForUpdate(): BuiltinLibraryV2 | null {
+    const index = this.index();
+    const runtime = index.currentFile ? this.readVersion(index.currentFile) : null;
+    if (runtime) return runtime;
+    try {
+      const bundledPath = join(import.meta.dirname, "../data/builtin-fingerprints.json.gz");
+      return JSON.parse(gunzipSync(readFileSync(bundledPath)).toString("utf8")) as BuiltinLibraryV2;
+    } catch {
+      return null;
     }
   }
 
@@ -456,7 +495,7 @@ export class ZenodoUpdateManager {
   }
 
   cancelPrepare(): void {
-    if (this.job && (this.job.status === "queued" || this.job.status === "running")) {
+    if (this.job?.kind === "prepare" && (this.job.status === "queued" || this.job.status === "running")) {
       this.controller?.abort();
       this.job.status = "canceled";
       this.job.finishedAt = new Date().toISOString();
@@ -644,7 +683,7 @@ export class ZenodoUpdateManager {
 
   // ---------- apply selected models ----------
 
-  updateFromCatalog(modelIds: string[]): ZenodoUpdateStatus {
+  private catalogSelection(modelIds: string[]) {
     const state = this.state();
     if (!state.lastSeen) throw new ZenodoUpdateError(400, "run the update check first");
     const recordId = state.lastSeen.recordId;
@@ -656,7 +695,6 @@ export class ZenodoUpdateManager {
     }
     const uniqueIds = [...new Set(modelIds.map((value) => value.trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
     if (!uniqueIds.length) throw new ZenodoUpdateError(400, "请选择至少一个模型");
-    const expected = this.expectedCellIds();
     const byModel = new Map<string, Map<string, AccumCell>>();
     for (const model of uniqueIds) {
       const raw = catalog.byModel[model];
@@ -678,46 +716,171 @@ export class ZenodoUpdateManager {
       runConfigSha256: meta.manifest.run_config_sha256 ?? "",
       normalizedSha256: meta.normalizedSha256 ?? "",
     };
-    const libraryVersion = `pamela-zenodo-${meta.version ?? recordId}@1`;
-    const library = buildLibrary(byModel, expected, {
-      libraryVersion,
-      source,
-      protocol: {
-        batteryVersion: ZENODO_BATTERY,
-        normalizeVersion: ZENODO_NORMALIZE,
-        systemPromptVersion: ZENODO_SYSTEM_PROMPT,
-        temperature: 1,
-        maxTokens: 16,
-        nominalRepetitions: 30,
-        repetitionsNote: "main plan nominally uses 30; expensive models may use 0.5 factor; authoritative per-cell totals are stored in counts and validity fields",
-        minValidPerCell: ZENODO_MIN_VALID_PER_CELL,
+    return {
+      recordId,
+      meta,
+      uniqueIds,
+      byModel,
+      expected: this.expectedCellIds(),
+      options: {
+        libraryVersion: `pamela-zenodo-${meta.version ?? recordId}@1`,
+        source,
+        protocol: {
+          batteryVersion: ZENODO_BATTERY,
+          normalizeVersion: ZENODO_NORMALIZE,
+          systemPromptVersion: ZENODO_SYSTEM_PROMPT,
+          temperature: 1,
+          maxTokens: 16,
+          nominalRepetitions: 30,
+          repetitionsNote: "main plan nominally uses 30; expensive models may use 0.5 factor; authoritative per-cell totals are stored in counts and validity fields",
+          minValidPerCell: ZENODO_MIN_VALID_PER_CELL,
+        },
       },
-      ids: uniqueIds,
+    };
+  }
+
+  private mergeSelection(selected: BuiltinLibraryV2, selectedIds: string[]): BuiltinLibraryV2 {
+    const current = this.currentLibraryForUpdate();
+    if (!current) return selected;
+    const index = this.index();
+    const currentVersion = index.currentFile ? index.versions.find((version) => version.file === index.currentFile) : undefined;
+    const fallbackRevision = currentVersion ? {
+      libraryVersion: currentVersion.libraryVersion,
+      revision: Number(currentVersion.file.match(/library-v(\d+)/)?.[1] ?? 1),
+      appliedAt: currentVersion.appliedAt,
+      recordId: currentVersion.zenodo.recordId,
+      datasetVersion: currentVersion.zenodo.version,
+    } : {
+      libraryVersion: current.libraryVersion,
+      revision: 0,
+    };
+    const replacements = new Map(selected.models.map((model) => [model.model, model]));
+    const merged = current.models.map((model) => {
+      const replacement = replacements.get(model.model);
+      if (replacement) { replacements.delete(model.model); return replacement; }
+      return { ...model, source: model.source ?? current.source, libraryRevision: model.libraryRevision ?? fallbackRevision };
     });
+    merged.push(...replacements.values());
+    return {
+      ...selected,
+      models: merged,
+      build: {
+        ...selected.build,
+        includedModels: merged.length,
+        excludedModels: 0,
+        excluded: [],
+        exclusionRule: `${selected.build.exclusionRule}; ${selectedIds.length} selected models applied, unselected models preserved`,
+      },
+    };
+  }
+
+  private saveUpdatedLibrary(library: BuiltinLibraryV2, selection: ReturnType<ZenodoUpdateManager["catalogSelection"]>): ZenodoUpdateStatus {
     const health = libraryHealth(library);
     if (!health.ok) throw new ZenodoUpdateError(422, `新库校验失败：${health.reason}`);
     if (!library.models.length) throw new ZenodoUpdateError(422, "所选模型均未通过 40-cell/有效样本门槛");
     const index = this.index();
-    const versionNo = index.versions.length + 1;
+    const currentVersion = index.currentFile ? index.versions.find((version) => version.file === index.currentFile) : undefined;
+    const appliedRecordIds = currentVersion?.appliedRecordIds
+      ? { ...currentVersion.appliedRecordIds }
+      : Object.fromEntries((currentVersion?.modelIds ?? []).map((modelId) => [modelId, currentVersion!.zenodo.recordId]));
+    for (const modelId of selection.uniqueIds) appliedRecordIds[modelId] = selection.recordId;
+    const versionNo = index.versions.reduce((max, version) => Math.max(max, Number(version.file.match(/library-v(\d+)/)?.[1] ?? 0)), 0) + 1;
     const file = `library-v${versionNo}.json.gz`;
-    writeFileSync(join(this.dir, file), gzipSync(Buffer.from(JSON.stringify(library)), { level: 9 }), { mode: 0o600 });
+    const appliedAt = new Date().toISOString();
+    const libraryVersion = `pamela-zenodo-${selection.meta.version ?? selection.recordId}@${versionNo}`;
+    const selectedIds = new Set(selection.uniqueIds);
+    const versionedLibrary: BuiltinLibraryV2 = {
+      ...library,
+      libraryVersion,
+      models: library.models.map((model) => selectedIds.has(model.model) ? {
+        ...model,
+        libraryRevision: {
+          libraryVersion,
+          revision: versionNo,
+          appliedAt,
+          recordId: selection.recordId,
+          datasetVersion: selection.meta.version,
+        },
+      } : model),
+    };
+    writeFileSync(join(this.dir, file), gzipSync(Buffer.from(JSON.stringify(versionedLibrary)), { level: 9 }), { mode: 0o600 });
     index.versions.push({
       file,
       libraryVersion,
-      appliedAt: new Date().toISOString(),
-      zenodo: { recordId, version: meta.version, updated: meta.updated },
-      modelIds: library.models.map((model) => model.model),
+      appliedAt,
+      zenodo: { recordId: selection.recordId, version: selection.meta.version, updated: selection.meta.updated },
+      modelIds: versionedLibrary.models.map((model) => model.model),
+      appliedRecordIds,
     });
-    // prune to last MAX_VERSION_KEEP versions, never removing the active file
     while (index.versions.length > MAX_VERSION_KEEP) {
-      const oldestIdx = index.versions[0]?.file === file ? 1 : 0;
-      const removed = index.versions.splice(oldestIdx, 1)[0];
-      if (removed) rmSync(join(this.dir, removed.file), { force: true });
+      const removed = index.versions.shift();
+      if (removed && removed.file !== file) rmSync(join(this.dir, removed.file), { force: true });
     }
     index.currentFile = file;
     this.writeIndex(index);
     invalidateLibraryCache();
     return this.status();
+  }
+
+  updateFromCatalog(modelIds: string[]): ZenodoUpdateStatus {
+    const selection = this.catalogSelection(modelIds);
+    const selected = buildLibrary(selection.byModel, selection.expected, { ...selection.options, ids: selection.uniqueIds });
+    return this.saveUpdatedLibrary(this.mergeSelection(selected, selection.uniqueIds), selection);
+  }
+
+  startApply(modelIds: string[], action: ApplyAction): ZenodoUpdateJob {
+    if (this.job && (this.job.status === "queued" || this.job.status === "running")) {
+      throw new ZenodoUpdateError(409, "another Zenodo update task is active");
+    }
+    if (action !== "update" && action !== "download") throw new ZenodoUpdateError(400, "invalid update action");
+    const selection = this.catalogSelection(modelIds);
+    this.job = {
+      id: `zenodo-apply-${Date.now().toString(36)}`,
+      kind: "apply",
+      action,
+      modelIds: selection.uniqueIds,
+      status: "queued",
+      stage: "validate",
+      progress: 0,
+      message: action === "update" ? "准备更新内置样本" : "准备下载新样本",
+      startedAt: new Date().toISOString(),
+    };
+    void this.runApply(selection);
+    return { ...this.job, modelIds: [...selection.uniqueIds] };
+  }
+
+  private async runApply(selection: ReturnType<ZenodoUpdateManager["catalogSelection"]>): Promise<void> {
+    try {
+      this.setJob({ status: "running", stage: "validate", progress: 8, message: `正在校验 ${selection.uniqueIds.length} 个模型` });
+      await yieldToEventLoop();
+      const shell = buildLibrary(new Map(), selection.expected, { ...selection.options, ids: [] });
+      const models: BuiltinLibraryV2["models"] = [];
+      for (let index = 0; index < selection.uniqueIds.length; index += 1) {
+        const modelId = selection.uniqueIds[index];
+        const cells = selection.byModel.get(modelId)!;
+        const partial = buildLibrary(new Map([[modelId, cells]]), selection.expected, { ...selection.options, ids: [modelId] });
+        if (!partial.models[0]) throw new ZenodoUpdateError(422, `模型 ${modelId} 未通过 40-cell/有效样本门槛`);
+        models.push(partial.models[0]);
+        this.setJob({
+          stage: "build",
+          progress: Math.min(82, 12 + Math.round(((index + 1) / selection.uniqueIds.length) * 70)),
+          message: `正在处理 ${index + 1} / ${selection.uniqueIds.length}：${modelId}`,
+        });
+        await yieldToEventLoop();
+      }
+      const selected: BuiltinLibraryV2 = {
+        ...shell,
+        models,
+        build: { ...shell.build, includedModels: models.length },
+      };
+      this.setJob({ stage: "save", progress: 90, message: "正在保存并校验新版本" });
+      await yieldToEventLoop();
+      this.saveUpdatedLibrary(this.mergeSelection(selected, selection.uniqueIds), selection);
+      this.setJob({ status: "done", stage: "done", progress: 100, message: `已完成 ${selection.uniqueIds.length} 个模型`, finishedAt: new Date().toISOString() });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.setJob({ status: "failed", error: message, message: "应用失败", finishedAt: new Date().toISOString() });
+    }
   }
 
   // ---------- rollback / cleanup ----------
@@ -748,6 +911,10 @@ export class ZenodoUpdateManager {
 function mergeCounts(left: Record<string, number>, right: Record<string, number>): Record<string, number> {
   for (const [key, value] of Object.entries(right)) left[key] = (left[key] ?? 0) + value;
   return left;
+}
+
+function yieldToEventLoop(): Promise<void> {
+  return new Promise((resolve) => setImmediate(resolve));
 }
 
 function sleep(ms: number, signal?: AbortSignal): Promise<void> {

@@ -27,6 +27,10 @@ export interface BuiltinReference {
   trustNotice: string;
   datasetDoi: string;
   license: string;
+  libraryVersion: string;
+  libraryRevision?: number;
+  libraryAppliedAt?: string;
+  datasetRecordId?: string;
 }
 
 interface BuiltinLibrary {
@@ -56,10 +60,19 @@ interface BuiltinLibrary {
     id: string;
     model: string;
     cells: Record<string, CellDistribution>;
+    source?: BuiltinLibrary["source"];
+    libraryRevision?: {
+      libraryVersion: string;
+      revision: number;
+      appliedAt?: string;
+      recordId?: string;
+      datasetVersion?: string;
+    };
   }>;
 }
 
 let cached: BuiltinLibrary | undefined;
+let activeLibraryRevision: BuiltinLibrary["models"][number]["libraryRevision"];
 
 // Optional runtime overlay: when the server updates the built-in library from
 // Zenodo, the updated library is stored in the data directory and read here
@@ -69,19 +82,34 @@ let overlayDir: string | undefined;
 export function configureLibraryOverlay(dir: string | undefined): void {
   overlayDir = dir;
   cached = undefined;
+  activeLibraryRevision = undefined;
 }
 
 export function invalidateLibraryCache(): void {
   cached = undefined;
+  activeLibraryRevision = undefined;
 }
 
 function loadOverlay(dir: string): BuiltinLibrary | undefined {
-  const index = JSON.parse(readFileSync(resolve(dir, "library-index.json"), "utf8")) as { currentFile?: string };
+  const index = JSON.parse(readFileSync(resolve(dir, "library-index.json"), "utf8")) as {
+    currentFile?: string;
+    versions?: Array<{ file: string; libraryVersion: string; appliedAt: string; zenodo?: { recordId?: string; version?: string } }>;
+  };
   if (!index.currentFile) return undefined;
   const path = resolve(dir, index.currentFile);
   const parsed = JSON.parse(gunzipSync(readFileSync(path)).toString("utf8")) as BuiltinLibrary;
   if (parsed.protocol.cellIds.length !== 40 || parsed.models.some((model) => !model.id.startsWith(BUILTIN_REFERENCE_PREFIX))) {
     return undefined;
+  }
+  const current = index.versions?.find((version) => version.file === index.currentFile);
+  if (current?.zenodo?.recordId) {
+    activeLibraryRevision = {
+      libraryVersion: current.libraryVersion,
+      revision: Number(index.currentFile.match(/library-v(\d+)/)?.[1] ?? 1),
+      appliedAt: current.appliedAt,
+      recordId: current.zenodo.recordId,
+      datasetVersion: current.zenodo.version,
+    };
   }
   return parsed;
 }
@@ -109,7 +137,9 @@ function library(): BuiltinLibrary {
 }
 
 function toReference(model: BuiltinLibrary["models"][number]): BuiltinReference {
-  const source = library().source;
+  const currentLibrary = library();
+  const source = model.source ?? currentLibrary.source;
+  const revision = model.libraryRevision ?? activeLibraryRevision;
   return {
     id: model.id,
     providerId: "builtin:pamela",
@@ -117,10 +147,10 @@ function toReference(model: BuiltinLibrary["models"][number]): BuiltinReference 
     label: `内置研究参考 · ${model.model}`,
     baseUrl: "https://openrouter.ai/",
     enrolledAt: source.collectedAt,
-    batteryVersion: library().protocol.batteryVersion,
-    normalizeVersion: library().protocol.normalizeVersion,
-    systemPromptVersion: library().protocol.systemPromptVersion,
-    cellIds: library().protocol.cellIds,
+    batteryVersion: currentLibrary.protocol.batteryVersion,
+    normalizeVersion: currentLibrary.protocol.normalizeVersion,
+    systemPromptVersion: currentLibrary.protocol.systemPromptVersion,
+    cellIds: currentLibrary.protocol.cellIds,
     fingerprint: {
       params: { temperature: 1, maxTokens: 16, repetitions: "per-cell-counts" },
       protocolDegraded: false,
@@ -132,6 +162,10 @@ function toReference(model: BuiltinLibrary["models"][number]): BuiltinReference 
     trustNotice: source.trustNotice,
     datasetDoi: source.datasetDoi,
     license: source.datasetLicense,
+    libraryVersion: revision?.libraryVersion ?? currentLibrary.libraryVersion,
+    libraryRevision: revision?.revision,
+    libraryAppliedAt: revision?.appliedAt,
+    datasetRecordId: revision?.recordId,
   };
 }
 

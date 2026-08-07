@@ -72,6 +72,47 @@ test("verify reference picker separates self-built and research sources", async 
   assert.match(css, /\.reference-source-filter/);
 });
 
+test("built-in sample actions expose progress, explicit outcomes, retry, and remove applied entries", async () => {
+  const [component, css] = await Promise.all([
+    readFile(new URL("../src/web/src/app/V2BuiltinLibraryUpdate.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../src/web/src/ui/styles/app.css", import.meta.url), "utf8"),
+  ]);
+  assert.match(component, /applyJob\.progress/);
+  assert.match(component, /builtin-loading-grid/);
+  assert.match(component, /内置样本更新成功/);
+  assert.match(component, /新样本下载成功/);
+  assert.match(component, /重试检查/);
+  assert.match(component, /applySelected\(applyJob\.modelIds/);
+  assert.match(component, /catalog\.appliedModelIds/);
+  assert.match(component, /现有内置样本已是最新版本/);
+  assert.match(component, /数据采集：/);
+  assert.match(component, /入库更新：/);
+  assert.match(component, /样本版本：/);
+  assert.match(component, /builtinQuery/);
+  assert.match(component, /newQuery/);
+  assert.match(component, /aria-label="搜索待更新的现有内置样本"/);
+  assert.match(component, /aria-label="搜索未内置的新样本"/);
+  assert.match(component, /selectedIdsIn\(pendingBuiltinModels\)/);
+  assert.match(component, /selectedIdsIn\(pendingNewModels\)/);
+  assert.doesNotMatch(component, /value=\{query\}/);
+  assert.match(css, /\.builtin-operation-feedback/);
+  assert.match(css, /\.builtin-complete-state/);
+  assert.match(css, /\.builtin-operation-progress/);
+});
+
+test("research library list separates collection date, library update date, and sample revision", async () => {
+  const [app, css] = await Promise.all([
+    readFile(new URL("../src/web/src/app/App.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../src/web/src/ui/styles/app.css", import.meta.url), "utf8"),
+  ]);
+  assert.match(app, /数据采集/);
+  assert.match(app, /入库更新/);
+  assert.match(app, /样本版本/);
+  assert.match(app, /libraryAppliedAt/);
+  assert.match(app, /libraryRevision/);
+  assert.match(css, /\.reference-library-meta/);
+});
+
 test("global loading state covers initial data sources and disables looping motion when requested", async () => {
   const [index, app, workspace, governance, css] = await Promise.all([
     readFile(new URL("../src/web/src/ui/index.ts", import.meta.url), "utf8"),

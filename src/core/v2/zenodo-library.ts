@@ -115,6 +115,15 @@ export interface MethodLibrary {
   id: string;
   model: string;
   cells: Record<string, CellDistribution>;
+  /** Per-model provenance is required when a partial update preserves older samples. */
+  source?: BuiltinSource;
+  libraryRevision?: {
+    libraryVersion: string;
+    revision: number;
+    appliedAt?: string;
+    recordId?: string;
+    datasetVersion?: string;
+  };
 }
 export interface BuiltinSource {
   title: string;
@@ -188,7 +197,7 @@ export function buildLibrary(
       const cell = cellsMap.get(cellId);
       if (cell) cells[cellId] = toCellDistribution(cell);
     }
-    models.push({ id: `builtin:pamela:${id}`, model: id, cells });
+    models.push({ id: `builtin:pamela:${id}`, model: id, cells, source: options.source });
     included += 1;
   }
   return {

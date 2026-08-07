@@ -34,6 +34,10 @@ export interface ApiReference {
   trustNotice?: string;
   datasetDoi?: string;
   license?: string;
+  libraryVersion?: string;
+  libraryRevision?: number;
+  libraryAppliedAt?: string;
+  datasetRecordId?: string;
 }
 
 export interface ApiRun {
@@ -91,7 +95,9 @@ export interface ApiConnectionTest {
 
 export interface ApiZenodoUpdateJob {
   id: string;
-  kind: "prepare";
+  kind: "prepare" | "apply";
+  action?: "update" | "download";
+  modelIds?: string[];
   status: "queued" | "running" | "done" | "failed" | "canceled";
   stage: string;
   progress: number;
@@ -107,11 +113,12 @@ export interface ApiZenodoProxyInfo { configured: boolean; host: string | null; 
 export interface ApiZenodoProxyTestResult { ok: boolean; error?: string; latencyMs?: number }
 
 export interface ApiZenodoUpdateStatus {
-  current: { libraryVersion: string; models: number; collectedAt: string; source: "bundled" | "runtime"; recordId?: string; modelIds: string[] };
+  current: { libraryVersion: string; models: number; collectedAt: string; source: "bundled" | "runtime"; recordId?: string; modelIds: string[]; appliedAt?: string; revision?: number };
   latest: { recordId: string; version?: string; updated: string } | null;
   updateAvailable: boolean;
-  catalog: { recordId?: string; ready: boolean; builtAt?: string; models: ApiZenodoCatalogModel[]; total: number; qualified: number };
+  catalog: { recordId?: string; ready: boolean; builtAt?: string; models: ApiZenodoCatalogModel[]; total: number; qualified: number; appliedModelIds: string[] };
   prepareJob: ApiZenodoUpdateJob | null;
+  applyJob: ApiZenodoUpdateJob | null;
   checkedAt?: string;
   lastError?: string;
   cacheBytes: number;
@@ -202,7 +209,7 @@ export const api = {
   builtinLibraryUpdatePrepare: () => request<ApiZenodoUpdateJob>("/api/v2/references/update/prepare", { method: "POST", body: "{}" }),
   builtinLibraryUpdateJob: (id: string) => request<ApiZenodoUpdateJob>(`/api/v2/references/update/jobs/${encodeURIComponent(id)}`),
   builtinLibraryUpdateCancelJob: (id: string) => request<ApiZenodoUpdateStatus>(`/api/v2/references/update/jobs/${encodeURIComponent(id)}/cancel`, { method: "POST", body: "{}" }),
-  builtinLibraryUpdateApply: (modelIds: string[]) => request<ApiZenodoUpdateStatus>("/api/v2/references/update", { method: "POST", body: JSON.stringify({ modelIds }) }),
+  builtinLibraryUpdateApply: (modelIds: string[], action: "update" | "download") => request<ApiZenodoUpdateJob>("/api/v2/references/update", { method: "POST", body: JSON.stringify({ modelIds, action }) }),
   builtinLibraryUpdateRollback: () => request<ApiZenodoUpdateStatus>("/api/v2/references/update/rollback", { method: "POST", body: "{}" }),
   builtinLibraryUpdateCleanCache: () => request<{ ok: boolean; freedBytes: number }>("/api/v2/references/update/cache/clean", { method: "POST", body: "{}" }),
   builtinLibraryProxyInfo: () => request<ApiZenodoProxyInfo>("/api/v2/references/update/proxy"),
